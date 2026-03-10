@@ -1,0 +1,32 @@
+{
+  "header": {
+    "title": "MedChex",
+    "subtitle": "Wechselwirkungsprüfer für Medikamente auf Basis von FDA-Daten"
+  },
+  "search": {
+    "hint": "Geben Sie 2–5 Medikamente ein, um Wechselwirkungen zu prüfen",
+    "placeholder_1": "Medikament 1 (z.B. Warfarin)",
+    "placeholder_2": "Medikament 2 (z.B. Ibuprofen)",
+    "placeholder_n": "Medikament {{n}} (z.B. Aspirin)",
+    "add_drug": "+ Medikament hinzufügen",
+    "check_btn": "Wechselwirkungen prüfen",
+    "checking": "Prüfung läuft..."
+  },
+  "result": {
+    "what_it_means": "Was das bedeutet",
+    "known_interactions": "Bekannte Wechselwirkungen ({{count}})",
+    "adverse_events": "{{count}} Berichte über unerwünschte Ereignisse in der FDA FAERS-Datenbank für diese Medikamente",
+    "disclaimer": "Dieses Tool dient nur zur Information. Konsultieren Sie immer einen Arzt, bevor Sie Medikamente ändern."
+  },
+  "severity": {
+    "SAFE": "✓ SICHER",
+    "CAUTION": "⚠ VORSICHT",
+    "DANGEROUS": "✕ GEFÄHRLICH"
+  },
+  "error": {
+    "not_found": "Ein oder mehrere Medikamente wurden in der RxNorm-Datenbank nicht gefunden. Überprüfen Sie die Schreibweise.",
+    "generic": "Etwas ist schiefgelaufen. Stellen Sie sicher, dass der Backend-Server auf Port 3001 läuft."
+  },
+  "footer": "Datenquellen: NIH RxNorm · FDA FAERS · Anthropic Claude",
+  "language_label": "Sprache"
+}

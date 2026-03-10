@@ -74,6 +74,12 @@ cd server && node index.js  # backend on http://localhost:3000
 
 ---
 
+## Documentation
+
+- [Mobile & Tablet Support](docs/MOBILE-TABLET-SUPPORT.md) — What devices MedChex works on and why
+
+---
+
 ## Status
 
 Active development — Pursuit L2 Capstone. Demo Day: March 18, 2026.

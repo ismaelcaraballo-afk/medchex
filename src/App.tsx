@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import DrugSearch from './components/DrugSearch'
 import ResultCard from './components/ResultCard'
+import VisualResult from './components/VisualResult'
+import LanguageSwitcher from './components/LanguageSwitcher'
 import { getRxCUI, getInteractions, scoreInteractions, explainInteractions, getFAERS } from './services/drugApi'
+import { RTL_LANGS } from './i18n'
 import './App.css'
 
 interface CheckResult {
@@ -12,7 +16,12 @@ interface CheckResult {
   faersCount?: number
 }
 
+// Languages where visual-first mode activates automatically
+// (low-literacy communities where text alone is insufficient)
+const VISUAL_FIRST_LANGS = new Set(['nah', 'es', 'hi', 'ar', 'bn', 'ur'])
+
 export default function App() {
+  const { t, i18n } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<CheckResult | null>(null)
@@ -26,24 +35,32 @@ export default function App() {
       // Step 1: Resolve each drug name to RxCUI
       const rxcuiResults = await Promise.all(drugs.map(d => getRxCUI(d)))
       const rxcuis = rxcuiResults
-        .map((r: { rxcui?: string }) => r.rxcui)
+        .map((r: any) => r?.idGroup?.rxnormId?.[0])
         .filter(Boolean) as string[]
 
       if (rxcuis.length < 2) {
-        setError('Could not find one or more drugs in the RxNorm database. Check your spelling.')
+        setError(t('error.not_found'))
         return
       }
 
       // Step 2: Get interactions
       const interactionData = await getInteractions(rxcuis)
-      const pairs = interactionData.interactionPairs ?? []
+      const pairs = interactionData.fullInteractionTypeGroup
+        ?.flatMap((g: any) => g.fullInteractionType ?? [])
+        ?.flatMap((t: any) => t.interactionPair ?? []) ?? []
 
       // Step 3: Score severity
       const scoreData = await scoreInteractions(pairs)
-      const severity: string = scoreData.severity ?? 'SAFE'
+      // Get highest severity from scored array (priority: DANGEROUS > CAUTION > SAFE)
+      const severityPriority = { DANGEROUS: 3, CAUTION: 2, SAFE: 1 }
+      const severity: string = scoreData.scored?.reduce((max: string, item: any) => {
+        const itemPriority = severityPriority[item.severity as keyof typeof severityPriority] || 0
+        const maxPriority = severityPriority[max as keyof typeof severityPriority] || 0
+        return itemPriority > maxPriority ? item.severity : max
+      }, 'SAFE') ?? 'SAFE'
 
-      // Step 4: AI explanation
-      const explainData = await explainInteractions(drugs, pairs, severity)
+      // Step 4: AI explanation — pass language so Claude responds in it
+      const explainData = await explainInteractions(drugs, pairs, severity, i18n.language)
       const explanation: string = explainData.explanation ?? ''
 
       // Step 5: FAERS adverse event count
@@ -53,28 +70,49 @@ export default function App() {
       setResult({ drugs, severity, explanation, interactions: pairs, faersCount })
 
     } catch (err) {
-      setError('Something went wrong. Make sure the backend server is running on port 3001.')
+      const isNetwork = err instanceof TypeError && (err.message.includes('fetch') || err.message.includes('Failed to fetch'))
+      setError(t(isNetwork ? 'error.network' : 'error.api'))
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
+  const lang = i18n.language.split('-')[0]
+  const dir = RTL_LANGS.has(lang) ? 'rtl' : 'ltr'
+  const visualFirst = useMemo(() => VISUAL_FIRST_LANGS.has(lang), [lang])
+
   return (
-    <div className="app">
+    <div className="app" dir={dir}>
       <header className="app-header">
-        <h1>MedChex</h1>
-        <p>Drug interaction checker backed by FDA data</p>
+        <div className="app-header-top">
+          <LanguageSwitcher />
+        </div>
+        <h1>{t('header.title')}</h1>
+        <p>{t('header.subtitle')}</p>
       </header>
 
       <main className="app-main">
         <DrugSearch onCheck={handleCheck} loading={loading} />
 
-        {error && (
-          <div className="error-banner">{error}</div>
+        {/* aria-live: screen readers announce errors and results without user navigating to them */}
+        <div aria-live="polite" aria-atomic="true">
+          {error && (
+            <div className="error-banner" role="alert">{error}</div>
+          )}
+        </div>
+
+        {/* Results region — announced when content appears */}
+        <div aria-live="polite" aria-atomic="false">
+        {result && visualFirst && (
+          <VisualResult
+            severity={result.severity}
+            drugs={result.drugs}
+            explanation={result.explanation}
+          />
         )}
 
-        {result && (
+        {result && !visualFirst && (
           <ResultCard
             drugs={result.drugs}
             severity={result.severity}
@@ -83,10 +121,11 @@ export default function App() {
             faersCount={result.faersCount}
           />
         )}
+        </div>
       </main>
 
       <footer className="app-footer">
-        Data sources: NIH RxNorm · FDA FAERS · Anthropic Claude
+        {t('footer')}
       </footer>
     </div>
   )

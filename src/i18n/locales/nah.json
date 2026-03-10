@@ -1,0 +1,34 @@
+{
+  "header": {
+    "title": "MedChex",
+    "subtitle": "Tlapalehuiliztli itech pahpahme ica FDA tlahtoa"
+  },
+  "search": {
+    "hint": "Xiquilhui 2 ica 5 pahme ica tlahtoa intechpa",
+    "placeholder_1": "Pahtli 1 (huan Warfarin)",
+    "placeholder_2": "Pahtli 2 (huan Ibuprofen)",
+    "placeholder_n": "Pahtli {{n}} (huan Aspirin)",
+    "add_drug": "+ Ticchihua ce pahtli",
+    "check_btn": "Xiquitta in pahpahme",
+    "checking": "Tiquitta..."
+  },
+  "result": {
+    "what_it_means": "Tlen quihtoa nochi",
+    "known_interactions": "Iximachilli tlanextilli ({{count}})",
+    "adverse_events": "{{count}} tlahtoa tlen amo cualli FDA FAERS ica in pahpahme",
+    "disclaimer": "In tlapalehuiliztli zan ica tlahtoa. Ma xicmopohua ica ce ticitl amo xicpalehui in pahme."
+  },
+  "severity": {
+    "SAFE": "✓ CUALLI",
+    "CAUTION": "⚠ XICMOCAHUILI",
+    "DANGEROUS": "✕ TETLAHTZOHTLALLI"
+  },
+  "error": {
+    "not_found": "Amo oticcac ce o miac pahme ica RxNorm. Xiquitta in tlahtoa.",
+    "generic": "Tlen amo cualli mochiuh. Xiquitta in servidor quiza ica puerto 3001.",
+    "network": "Amo tlachiaz in internet. Xicchihua oc cepa.",
+    "api": "Amo cualli pahme tlamachiltia. Xicchihua oc cepa."
+  },
+  "footer": "Tlahtolli: NIH RxNorm · FDA FAERS · Anthropic Claude",
+  "language_label": "Tlahtol"
+}

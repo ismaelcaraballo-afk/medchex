@@ -15,6 +15,10 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(1)
 }
 
+if (process.env.DEMO_MODE === 'true') {
+  console.warn('[MedChex] DEMO_MODE active — all API calls are mocked with pre-validated data')
+}
+
 const app = express()
 const PORT = process.env.PORT || 3001
 
@@ -73,6 +77,51 @@ const DEMO_INTERACTIONS = {
     }]
   }
 }
+
+// WHY: DEMO_FAERS pre-returns real adverse event counts for demo drugs.
+// Prevents live API calls to FAERS during the presentation.
+const DEMO_FAERS = {
+  'warfarin': 42000,
+  'ibuprofen': 28000,
+  'lisinopril': 15000,
+  'aspirin': 35000,
+}
+
+// --- DATA SOURCE 0: RxNorm — NDC barcode → drug name ---
+// WHY: Medication bottles have NDC barcodes. Non-readers can scan instead of type.
+// RxNorm accepts NDC codes and returns the RxCUI, which we then resolve to a name.
+// TODO: implement full scan loop in BarcodeScanner.tsx (deferred — needs @zxing for iOS)
+app.get('/api/drug/ndc', async (req, res) => {
+  const { code } = req.query
+  if (!code || typeof code !== 'string') {
+    return res.status(400).json({ error: 'NDC code is required.' })
+  }
+
+  const cacheKey = `ndc:${code}`
+  const cached = cache.get(cacheKey)
+  if (cached) return res.json(cached)
+
+  try {
+    // Step 1: NDC → RxCUI
+    const rxUrl = `https://rxnav.nlm.nih.gov/REST/rxcui.json?idtype=NDC&id=${encodeURIComponent(code)}`
+    const rxData = await fetch(rxUrl).then(r => r.json())
+    const rxcui = rxData?.idGroup?.rxnormId?.[0]
+    if (!rxcui) return res.status(404).json({ error: 'Drug not found for this barcode.' })
+
+    // Step 2: RxCUI → drug name
+    const nameUrl = `https://rxnav.nlm.nih.gov/REST/rxcui/${rxcui}/property.json?propName=RxNorm%20Name`
+    const nameData = await fetch(nameUrl).then(r => r.json())
+    const name = nameData?.propConceptGroup?.propConcept?.[0]?.propValue
+
+    if (!name) return res.status(404).json({ error: 'Could not resolve drug name.' })
+
+    const result = { name, rxcui }
+    cache.set(cacheKey, result)
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({ error: 'Could not reach RxNorm API. Please try again.' })
+  }
+})
 
 // --- DATA SOURCE 1: RxNorm — drug name → RxCUI normalization ---
 // WHY: RxCUI is the standard drug ID used by all NIH/FDA systems.
@@ -147,6 +196,16 @@ app.get('/api/faers', async (req, res) => {
   const cached = cache.get(cacheKey)
   if (cached) return res.json(cached)
 
+  // Check DEMO_MODE first
+  if (process.env.DEMO_MODE === 'true') {
+    const drugLower = drug.toLowerCase().trim()
+    if (drugLower in DEMO_FAERS) {
+      const result = { total: DEMO_FAERS[drugLower] }
+      cache.set(cacheKey, result)
+      return res.json(result)
+    }
+  }
+
   try {
     const url = `https://api.fda.gov/drug/event.json?search=patient.drug.medicinalproduct:"${encodeURIComponent(drug.trim())}"&limit=5`
     const data = await fetch(url).then(r => r.json())
@@ -170,9 +229,11 @@ app.post('/api/score', async (req, res) => {
   }
 
   // WHY: Check DEMO_MODE — if flagged, return pre-validated data for common demo pairs.
+  // Normalize to lowercase so "Warfarin,Ibuprofen" matches "warfarin,ibuprofen" in the table.
   if (process.env.DEMO_MODE === 'true') {
-    const key = interactionPairs.map(p => p.drug1?.toLowerCase()).sort().join(',')
-    if (DEMO_INTERACTIONS[key]) return res.json(DEMO_INTERACTIONS[key])
+    const demoKey = interactionPairs.map(p => p.drug1?.toLowerCase()).sort().join(',')
+    const demoResult = DEMO_INTERACTIONS[demoKey]
+    if (demoResult) return res.json(demoResult)
   }
 
   try {
@@ -197,12 +258,22 @@ app.post('/api/score', async (req, res) => {
 // IMPORTANT: Claude does NOT determine if a drug interaction exists or how serious it is.
 // That logic stays in /api/score using real FDA data. Claude only explains what it means.
 // This prevents AI hallucination from affecting safety-critical information.
+// Language code → full language name for the Claude prompt
+const LANG_NAMES = {
+  en: 'English', es: 'Spanish', zh: 'Simplified Chinese', hi: 'Hindi',
+  ar: 'Arabic', bn: 'Bengali', pt: 'Portuguese', ru: 'Russian',
+  fr: 'French', ur: 'Urdu', yi: 'Yiddish', nah: 'Nahuatl',
+  ja: 'Japanese', de: 'German'
+}
+
 app.post('/api/explain', async (req, res) => {
-  const { interactions, drugs, severity } = req.body
+  const { interactions, drugs, severity, lang = 'en' } = req.body
 
   if (!Array.isArray(drugs) || drugs.length === 0) {
     return res.status(400).json({ error: 'drugs array is required.' })
   }
+
+  const languageName = LANG_NAMES[lang] || 'English'
 
   try {
     const message = await anthropic.messages.create({
@@ -210,7 +281,8 @@ app.post('/api/explain', async (req, res) => {
       max_tokens: 512,
       messages: [{
         role: 'user',
-        content: `You are a pharmacist explaining drug interactions in plain English to a patient (not a doctor).
+        content: `You are a pharmacist explaining drug interactions to a patient (not a doctor).
+Respond entirely in ${languageName}. Use plain language appropriate for that language's speakers.
 
 Medications entered: ${drugs.join(', ')}
 Severity level determined by FDA data: ${severity}
@@ -221,7 +293,7 @@ In 2-3 short paragraphs:
 2. How serious it is and what could happen
 3. What the patient should do (call pharmacist, avoid combination, monitor symptoms, etc.)
 
-Use plain language. No medical jargon. Be direct and caring. End with: "For informational purposes only. Always consult your pharmacist or physician."`
+Use plain language. No medical jargon. Be direct and caring. Respond in ${languageName}.`
       }]
     })
 

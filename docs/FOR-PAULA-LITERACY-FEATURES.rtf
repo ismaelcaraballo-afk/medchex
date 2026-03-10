@@ -1,0 +1,184 @@
+{\rtf1\ansi\deff0
+{\fonttbl
+{\f0\froman\fcharset0 Georgia;}
+{\f1\fswiss\fcharset0 Arial;}
+{\f2\fmodern\fcharset0 Courier New;}
+}
+{\colortbl;
+\red15\green23\blue42;
+\red14\green165\blue233;
+\red239\green68\blue68;
+\red245\green158\blue11;
+\red34\green197\blue94;
+\red100\green116\blue139;
+\red255\green255\blue255;
+\red30\green35\blue52;
+}
+\paperw12240\paperh15840
+\margl1440\margr1440\margt1440\margb1440
+\widowctrl\hyphauto
+
+{\pard\sb480\sa120\f0\fs48\b\cf2 MedChex\cf0  \u8212? What We Added and Why\par}
+
+{\pard\sa80\f1\fs22\cf6 For Paula | Written March 2026 | MedChex Capstone, Cycle 4\par}
+{\pard\sa80\f1\fs22\cf6 Partner: Ismael Caraballo | UX Lead: Paula\par}
+
+{\pard\sb240\sa240\f1\fs22\cf0\qj
+Hey Paula \u8212?\line\line
+Ismael asked me to write this up for you in plain terms, not engineering terms. You\u8217?re the UX lead. These decisions belong to you. This doc is meant to explain the {\b why} behind what we built, so you can push back, redirect, or expand on it. This is a conversation, not a delivery.\par}
+
+{\pard\sb0\sa240\f1\fs22\cf0\qj
+I read what you shared about how you learn \u8212? tactile, visual, auditory, and most importantly: through {\i understanding the rationale}, not receiving finished documents. So that\u8217?s how I wrote this.\par}
+
+\pard\sb360\sa0\brdrb\brdrs\brdrw10\brdrcolor\red200\green200\blue200 \par\pard\sb0
+
+{\pard\sb360\sa120\f0\fs36\b The Problem Behind the Features\par}
+
+{\pard\sa240\f1\fs22\cf0\qj
+When we researched who MedChex is actually for, one community stood out as having the highest stakes and the least support: {\b Nahuatl speakers from rural Mexico living in New York City} \u8212? many of whom never attended school, in Mexico or here.\par}
+
+{\pard\sa240\f1\fs22\cf0\qj
+These are people who:\par}
+
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? Pick up medications at a pharmacy where no one speaks their language\par}
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? Cannot read the label on the bottle\par}
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? Cannot Google the drug name\par}
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? Cannot call a hotline\par}
+{\pard\li720\sa240\f1\fs22\cf0 \u8226? Rely entirely on a family member or a bilingual pharmacist being available\par}
+
+{\pard\sa240\f1\fs22\cf0\qj
+We looked at every major tool that exists \u8212? Drugs.com, WebMD, Medscape, Epocrates, the NIH, all of them. {\b Not one supports any language other than English.} Not one was designed for someone who can\u8217?t read. We documented this in our competitive research.\par}
+
+{\pard\sa240\f1\fs22\cf0\qj
+The science backs this up:\par}
+
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? Studies in JAMA, NEJM, and Annals of Internal Medicine show patients with Limited English Proficiency have {\b 2\u8211?3x higher rates of adverse drug events} than English speakers\par}
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? A 2021 Health Affairs study found 25 million Americans have limited English proficiency \u8212? medication errors in this group are disproportionately severe\par}
+{\pard\li720\sa80\f1\fs22\cf0 \u8226? The World Health Organization found that {\b icon-based pill schedules improve medication adherence by ~40%} in low-literacy populations\par}
+{\pard\li720\sa240\f1\fs22\cf0 \u8226? Audio-based health information has shown strong results in Nahuatl-speaking communities in public health programs in Mexico \u8212? no US digital tool has ever done this\par}
+
+\pard\sb360\sa0\brdrb\brdrs\brdrw10\brdrcolor\red200\green200\blue200 \par\pard\sb0
+
+{\pard\sb360\sa120\f0\fs36\b What We Built and Why\par}
+
+{\pard\sb240\sa60\f0\fs28\b\cf4 \u9654? Auto-Play Audio \u8212? \u8220?Just talk to me\u8221?\par}
+
+{\pard\sa80\f1\fs22\cf6\i The problem:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+Even with big icons and color-coding, a non-reader still has to {\i find} the audio button and {\i know} it will read the result. That\u8217?s a cognitive step that assumes they understand what a speaker icon means.\par}
+
+{\pard\sa80\f1\fs22\cf6\i What we did:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+When a result appears, the app automatically starts speaking it aloud, 0.6 seconds after loading. No button press needed. The user doesn\u8217?t have to look for anything.\par}
+
+{\pard\sa80\f1\fs22\cf6\i Who this helps:\par}
+{\pard\sa240\f1\fs22\cf0\qj
+Non-readers in every language. Also low-vision users, elderly users, and anyone anxious enough that they just want to {\i hear} the answer without hunting for a button.\par}
+
+{\pard\sb240\sa60\f0\fs28\b\cf4 \u9654? Haptic Feedback \u8212? \u8220?I felt something\u8221?\par}
+
+{\pard\sa80\f1\fs22\cf6\i The problem:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+A person in a loud pharmacy, with a phone on silent, looking at a small screen might miss even the visual result.\par}
+
+{\pard\sa80\f1\fs22\cf6\i What we did:\par}
+{\pard\sa120\f1\fs22\cf0\qj
+When a result loads, the phone vibrates in a pattern:\par}
+{\pard\li720\sa80\f1\fs22\cf5\b SAFE \cf0\b0\f1 \u8594? one gentle pulse\par}
+{\pard\li720\sa80\f1\fs22\cf4\b CAUTION \cf0\b0\f1 \u8594? two pulses\par}
+{\pard\li720\sa200\f1\fs22\cf3\b DANGEROUS \cf0\b0\f1 \u8594? three rapid pulses\par}
+
+{\pard\sa80\f1\fs22\cf6\i Who this helps:\par}
+{\pard\sa240\f1\fs22\cf0\qj
+Someone holding the phone who might not be looking at the screen. The vibration pattern communicates severity {\i before} they even look. It works on silent. It works with the screen face-down. No reading required.\par}
+
+{\pard\sb240\sa60\f0\fs28\b\cf4 \u9654? Tap Drug Name to Hear It \u8212? \u8220?What is this called?\u8221?\par}
+
+{\pard\sa80\f1\fs22\cf6\i The problem:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+The result shows drug names as text: \u8220?Warfarin\u8221? and \u8220?Ibuprofen.\u8221? A non-reader can\u8217?t read those words. But they might need to {\i say} one of them to a family member, or point to it when a pharmacist asks \u8220?which medication?\u8221?\par}
+
+{\pard\sa80\f1\fs22\cf6\i What we did:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+Each drug name is now a tap-able button. Tap it, and the phone speaks that drug name aloud. The user can tap, listen, and then repeat the word \u8212? in their language or in English.\par}
+
+{\pard\sa80\f1\fs22\cf6\i Who this helps:\par}
+{\pard\sa240\f1\fs22\cf0\qj
+Anyone who needs to communicate a drug name verbally but cannot read it. This closes the loop between the screen and the conversation.\par}
+
+{\pard\sb240\sa60\f0\fs28\b\cf4 \u9654? Pharmacist Card \u8212? \u8220?Show this instead of saying it\u8221?\par}
+
+{\pard\sa80\f1\fs22\cf6\i The problem:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+A patient who doesn\u8217?t speak English walks up to a pharmacist. They want to ask about two of their medications. How do they communicate that? Right now: they guess, they mime, they hope someone nearby speaks their language.\par}
+
+{\pard\sa80\f1\fs22\cf6\i What we did:\par}
+{\pard\sa120\f1\fs22\cf0\qj
+A pill button ({\f2\fs20 \u0128?}) opens a full-screen card in {\b English} \u8212? always in English regardless of the app language \u8212? that shows:\par}
+
+{\pard\li720\sa60\f2\fs20\cf0
+My patient is asking about:\line
+[ Warfarin ]  [ Ibuprofen ]\line\line
+\u0240? DANGEROUS \u8212? do not take together\line\line
+Source: FDA FAERS + NIH RxNorm \u183? MedChex\par}
+
+{\pard\sa80\f1\fs22\cf6\i Who this helps:\par}
+{\pard\sa240\f1\fs22\cf0\qj
+Anyone whose communication with a pharmacist is blocked by language. The patient does the research in their language. The pharmacist reads the result in English. No interpreter needed for the core safety message.\par}
+
+{\pard\sb240\sa60\f0\fs28\b\cf4 \u9654? Barcode Scanner \u8212? \u8220?I can\u8217?t type this word\u8221? (coming soon)\par}
+
+{\pard\sa80\f1\fs22\cf6\i The problem:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+The biggest literacy barrier in the app isn\u8217?t the result \u8212? it\u8217?s the {\i input}. To check a drug, you have to type its name. A non-reader cannot type \u8220?Warfarin.\u8221? They can\u8217?t spell it. They can\u8217?t approximate it in a search box.\par}
+
+{\pard\sa80\f1\fs22\cf6\i What we\u8217?re building:\par}
+{\pard\sa200\f1\fs22\cf0\qj
+A camera button next to each drug input field. The user points their phone camera at the barcode on the pill bottle. The app reads the barcode, identifies the drug, and fills in the name automatically. {\b Zero typing. Zero spelling. Zero reading.}\par}
+
+{\pard\sa80\f1\fs22\cf6\i Status:\par}
+{\pard\sa240\f1\fs22\cf0\qj
+The button and camera access are scaffolded. The barcode decode loop is the next piece \u8212? we\u8217?re adding a library that works on both Android and iPhone.\par}
+
+\pard\sb360\sa0\brdrb\brdrs\brdrw10\brdrcolor\red200\green200\blue200 \par\pard\sb0
+
+{\pard\sb360\sa120\f0\fs36\b Meet Rosa\par}
+
+{\pard\sa240\f1\fs22\cf0\qj
+This is the person we built these features for.\par}
+
+{\pard\li720\ri720\sa240\f0\fs24\cf0\i\qj
+Rosa is 67. She lives in Sunset Park, Brooklyn. Her primary language is Nahuatl. She never went to school in Mexico. Her daughter, who speaks Spanish, picks up her medications. Rosa takes Warfarin for a heart condition. A neighbor tells her ibuprofen will help her back pain. She doesn\u8217?t know they\u8217?re dangerous together.\line\line
+Her daughter opens MedChex, selects Nahuatl, and scans both pill bottles. The phone vibrates three times, fast. A big red \u0240? appears on screen. The app speaks in Spanish \u8212? Nahuatl\u8217?s closest fallback language. The daughter shows the pharmacist the English card. The pharmacist explains the risk. Rosa doesn\u8217?t take ibuprofen.\par}
+
+{\pard\sa240\f1\fs22\cf0\qj
+That outcome \u8212? that specific prevented harm \u8212? is what these features exist for.\par}
+
+\pard\sb360\sa0\brdrb\brdrs\brdrw10\brdrcolor\red200\green200\blue200 \par\pard\sb0
+
+{\pard\sb360\sa120\f0\fs36\b Questions for You, Paula\par}
+
+{\pard\sa200\f1\fs22\cf0\qj
+These are design decisions where your eye matters more than the code. Bring these back:\par}
+
+{\pard\li360\sa120\f1\fs22\cf0 {\b 1. Pharmacist card \u8212? large print?}\line
+Some pharmacists view it across a counter. Should there be a button to increase the text size on that card?\par}
+
+{\pard\li360\sa120\f1\fs22\cf0 {\b 2. Auto-play audio \u8212? on/off toggle?}\line
+Some users are in public and don\u8217?t want the phone speaking aloud. Where would an on/off switch for this live? Should it default to on or off?\par}
+
+{\pard\li360\sa120\f1\fs22\cf0 {\b 3. Haptic patterns \u8212? strong enough?}\line
+Are three rapid pulses for DANGEROUS too subtle? Should the DANGEROUS pattern be longer or more intense? What does your instinct say?\par}
+
+{\pard\li360\sa120\f1\fs22\cf0 {\b 4. Barcode scanner button \u8212? is the camera icon clear?}\line
+The \u0128? icon is next to each drug input field. Is that clear to someone who doesn\u8217?t know what a barcode is? What image or label would say \u8220?scan your pill bottle\u8221? better?\par}
+
+{\pard\li360\sa240\f1\fs22\cf0 {\b 5. Drug pill tap-to-hear \u8212? is the \u0240? icon enough?}\line
+We added a small speaker icon to each drug name to signal it\u8217?s tappable. Would a different visual cue communicate \u8220?tap me to hear this\u8221? better for a non-reader?\par}
+
+\pard\sb360\sa0\brdrb\brdrs\brdrw10\brdrcolor\red200\green200\blue200 \par\pard\sb0
+
+{\pard\sb360\sa200\f1\fs20\cf6\i Written by RRC for Ismael Caraballo \u8212? MedChex Capstone, Pursuit Cycle 4\line
+Research source: docs/COMPETITIVE-RESEARCH.md | Demo Day: March 18, 2026\par}
+
+}

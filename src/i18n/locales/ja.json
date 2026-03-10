@@ -1,0 +1,32 @@
+{
+  "header": {
+    "title": "MedChex",
+    "subtitle": "FDAデータに基づく薬物相互作用チェッカー"
+  },
+  "search": {
+    "hint": "相互作用を確認するために2〜5種類の薬を入力してください",
+    "placeholder_1": "薬1（例：ワルファリン）",
+    "placeholder_2": "薬2（例：イブプロフェン）",
+    "placeholder_n": "薬{{n}}（例：アスピリン）",
+    "add_drug": "+ 薬を追加",
+    "check_btn": "相互作用を確認",
+    "checking": "確認中..."
+  },
+  "result": {
+    "what_it_means": "これが意味すること",
+    "known_interactions": "既知の相互作用（{{count}}件）",
+    "adverse_events": "これらの薬に関してFDA FAERSデータベースに{{count}}件の有害事象報告があります",
+    "disclaimer": "このツールは情報提供のみを目的としています。薬を変更する前に必ず医療専門家に相談してください。"
+  },
+  "severity": {
+    "SAFE": "✓ 安全",
+    "CAUTION": "⚠ 注意",
+    "DANGEROUS": "✕ 危険"
+  },
+  "error": {
+    "not_found": "RxNormデータベースで1つ以上の薬が見つかりませんでした。スペルを確認してください。",
+    "generic": "エラーが発生しました。バックエンドサーバーがポート3001で動作していることを確認してください。"
+  },
+  "footer": "データソース: NIH RxNorm · FDA FAERS · Anthropic Claude",
+  "language_label": "言語"
+}

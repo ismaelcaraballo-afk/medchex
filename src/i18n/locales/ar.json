@@ -1,0 +1,34 @@
+{
+  "header": {
+    "title": "MedChex",
+    "subtitle": "أداة فحص التفاعلات الدوائية المستندة إلى بيانات FDA"
+  },
+  "search": {
+    "hint": "أدخل من 2 إلى 5 أدوية للتحقق من التفاعلات",
+    "placeholder_1": "الدواء 1 (مثل: Warfarin)",
+    "placeholder_2": "الدواء 2 (مثل: Ibuprofen)",
+    "placeholder_n": "الدواء {{n}} (مثل: Aspirin)",
+    "add_drug": "+ إضافة دواء",
+    "check_btn": "فحص التفاعلات",
+    "checking": "جارٍ الفحص..."
+  },
+  "result": {
+    "what_it_means": "ماذا يعني هذا",
+    "known_interactions": "التفاعلات المعروفة ({{count}})",
+    "adverse_events": "{{count}} تقرير عن أحداث سلبية في قاعدة بيانات FDA FAERS لهذه الأدوية",
+    "disclaimer": "هذه الأداة للمعلومات فقط. استشر دائماً مقدم الرعاية الصحية قبل تغيير أدويتك."
+  },
+  "severity": {
+    "SAFE": "✓ آمن",
+    "CAUTION": "⚠ تنبيه",
+    "DANGEROUS": "✕ خطير"
+  },
+  "error": {
+    "not_found": "تعذر العثور على دواء أو أكثر في قاعدة بيانات RxNorm. تحقق من الإملاء.",
+    "generic": "حدث خطأ ما. تأكد من تشغيل الخادم الخلفي على المنفذ 3001.",
+    "network": "خطأ في الاتصال. تحقق من الإنترنت وحاول مجدداً.",
+    "api": "خدمة البيانات غير متاحة. حاول مرة أخرى بعد لحظة."
+  },
+  "footer": "مصادر البيانات: NIH RxNorm · FDA FAERS · Anthropic Claude",
+  "language_label": "اللغة"
+}

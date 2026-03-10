@@ -1,0 +1,34 @@
+{
+  "header": {
+    "title": "MedChex",
+    "subtitle": "Vérificateur d'interactions médicamenteuses basé sur les données FDA"
+  },
+  "search": {
+    "hint": "Entrez 2 à 5 médicaments pour vérifier les interactions",
+    "placeholder_1": "Médicament 1 (ex. Warfarine)",
+    "placeholder_2": "Médicament 2 (ex. Ibuprofène)",
+    "placeholder_n": "Médicament {{n}} (ex. Aspirine)",
+    "add_drug": "+ Ajouter un médicament",
+    "check_btn": "Vérifier les interactions",
+    "checking": "Vérification..."
+  },
+  "result": {
+    "what_it_means": "Ce que cela signifie",
+    "known_interactions": "Interactions connues ({{count}})",
+    "adverse_events": "{{count}} rapports d'événements indésirables dans la base de données FDA FAERS pour ces médicaments",
+    "disclaimer": "Cet outil est fourni à titre informatif uniquement. Consultez toujours un professionnel de santé avant de modifier vos médicaments."
+  },
+  "severity": {
+    "SAFE": "✓ SÛR",
+    "CAUTION": "⚠ ATTENTION",
+    "DANGEROUS": "✕ DANGEREUX"
+  },
+  "error": {
+    "not_found": "Impossible de trouver un ou plusieurs médicaments dans la base RxNorm. Vérifiez l'orthographe.",
+    "generic": "Une erreur s'est produite. Assurez-vous que le serveur backend fonctionne sur le port 3001.",
+    "network": "Erreur de connexion. Vérifiez votre connexion internet et réessayez.",
+    "api": "Service de données indisponible. Réessayez dans un instant."
+  },
+  "footer": "Sources de données : NIH RxNorm · FDA FAERS · Anthropic Claude",
+  "language_label": "Langue"
+}

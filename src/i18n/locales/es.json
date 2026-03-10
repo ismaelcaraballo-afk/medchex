@@ -1,0 +1,34 @@
+{
+  "header": {
+    "title": "MedChex",
+    "subtitle": "Verificador de interacciones medicamentosas basado en datos de la FDA"
+  },
+  "search": {
+    "hint": "Ingresa de 2 a 5 medicamentos para verificar interacciones",
+    "placeholder_1": "Medicamento 1 (ej. Warfarina)",
+    "placeholder_2": "Medicamento 2 (ej. Ibuprofeno)",
+    "placeholder_n": "Medicamento {{n}} (ej. Aspirina)",
+    "add_drug": "+ Agregar medicamento",
+    "check_btn": "Verificar interacciones",
+    "checking": "Verificando..."
+  },
+  "result": {
+    "what_it_means": "Qué significa esto",
+    "known_interactions": "Interacciones conocidas ({{count}})",
+    "adverse_events": "{{count}} reportes de eventos adversos en la base de datos FDA FAERS para estos medicamentos",
+    "disclaimer": "Esta herramienta es solo informativa. Siempre consulte a un profesional de la salud antes de cambiar sus medicamentos."
+  },
+  "severity": {
+    "SAFE": "✓ SEGURO",
+    "CAUTION": "⚠ PRECAUCIÓN",
+    "DANGEROUS": "✕ PELIGROSO"
+  },
+  "error": {
+    "not_found": "No se encontró uno o más medicamentos en la base de datos RxNorm. Verifique la ortografía.",
+    "generic": "Algo salió mal. Asegúrese de que el servidor backend esté corriendo en el puerto 3001.",
+    "network": "Error de conexión. Verifica tu internet e intenta de nuevo.",
+    "api": "Servicio no disponible. Inténtalo en un momento."
+  },
+  "footer": "Fuentes de datos: NIH RxNorm · FDA FAERS · Anthropic Claude",
+  "language_label": "Idioma"
+}

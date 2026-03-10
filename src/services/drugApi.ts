@@ -33,15 +33,22 @@ export async function scoreInteractions(interactionPairs: unknown[]) {
 }
 
 // Claude AI plain-English explanation (Claude only explains — FDA data detects)
-export async function explainInteractions(drugs: string[], interactions: unknown, severity: string) {
+// lang: BCP 47 language code — Claude will respond in that language
+export async function explainInteractions(drugs: string[], interactions: unknown, severity: string, lang = 'en') {
   return apiFetch(`${BASE}/explain`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ drugs, interactions, severity })
+    body: JSON.stringify({ drugs, interactions, severity, lang })
   })
 }
 
 // OpenFDA FAERS adverse event data for a drug
 export async function getFAERS(drug: string) {
   return apiFetch(`${BASE}/faers?drug=${encodeURIComponent(drug)}`)
+}
+
+// Resolve NDC barcode → drug name via RxNorm
+// TODO: called by BarcodeScanner when a barcode is successfully decoded
+export async function getDrugByNDC(ndc: string) {
+  return apiFetch(`${BASE}/drug/ndc?code=${encodeURIComponent(ndc)}`)
 }

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import BarcodeScanner from './BarcodeScanner'
 
 interface DrugSearchProps {
   onCheck: (drugs: string[]) => void
@@ -6,6 +8,7 @@ interface DrugSearchProps {
 }
 
 export default function DrugSearch({ onCheck, loading }: DrugSearchProps) {
+  const { t } = useTranslation()
   const [drugs, setDrugs] = useState<string[]>(['', ''])
 
   const updateDrug = (index: number, value: string) => {
@@ -30,12 +33,18 @@ export default function DrugSearch({ onCheck, loading }: DrugSearchProps) {
     onCheck(filled)
   }
 
+  const getPlaceholder = (i: number) => {
+    if (i === 0) return t('search.placeholder_1')
+    if (i === 1) return t('search.placeholder_2')
+    return t('search.placeholder_n', { n: i + 1 })
+  }
+
   const filled = drugs.filter(d => d.trim()).length
   const canSubmit = filled >= 2 && !loading
 
   return (
     <form onSubmit={handleSubmit} className="drug-search">
-      <p className="drug-search-hint">Enter 2–5 medications to check for interactions</p>
+      <p className="drug-search-hint">{t('search.hint')}</p>
 
       <div className="drug-inputs">
         {drugs.map((drug, i) => (
@@ -44,8 +53,13 @@ export default function DrugSearch({ onCheck, loading }: DrugSearchProps) {
               type="text"
               value={drug}
               onChange={e => updateDrug(i, e.target.value)}
-              placeholder={`Drug ${i + 1} (e.g. ${i === 0 ? 'Warfarin' : i === 1 ? 'Ibuprofen' : 'Aspirin'})`}
+              placeholder={getPlaceholder(i)}
               className="drug-input"
+              disabled={loading}
+            />
+            {/* Barcode scan fills this input — no typing required */}
+            <BarcodeScanner
+              onDrug={name => updateDrug(i, name)}
               disabled={loading}
             />
             {drugs.length > 2 && (
@@ -70,7 +84,7 @@ export default function DrugSearch({ onCheck, loading }: DrugSearchProps) {
             className="add-btn"
             disabled={loading}
           >
-            + Add Drug
+            {t('search.add_drug')}
           </button>
         )}
         <button
@@ -78,7 +92,7 @@ export default function DrugSearch({ onCheck, loading }: DrugSearchProps) {
           disabled={!canSubmit}
           className="check-btn"
         >
-          {loading ? 'Checking...' : 'Check Interactions'}
+          {loading ? t('search.checking') : t('search.check_btn')}
         </button>
       </div>
     </form>
