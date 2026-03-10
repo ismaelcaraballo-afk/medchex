@@ -1,4 +1,4 @@
-# MedChex — Competitive Research & Market Analysis
+# MedPharmChex — Competitive Research & Market Analysis
 **Research by:** RRC (AI training data through Aug 2025)
 **Date:** March 2026
 
@@ -7,7 +7,7 @@
 ## TL;DR for Demo Day
 
 **No existing public drug interaction checker supports any language other than English.**
-MedChex is the first interactive drug interaction checker in Nahuatl, Yiddish, Bengali, Urdu, and several other languages. That's not a feature — that's a market gap that has existed for 20+ years.
+MedPharmChex is the first interactive drug interaction checker in Nahuatl, Yiddish, Bengali, Urdu, and several other languages. That's not a feature — that's a market gap that has existed for 20+ years.
 
 ---
 
@@ -23,7 +23,7 @@ MedChex is the first interactive drug interaction checker in Nahuatl, Yiddish, B
 | **IBM Micromedex** | Institutional ($10K–$50K+/yr) | English + limited Spanish patient handouts | No | No | No | Most comprehensive clinical database. Spanish patient handouts exist but interaction checker UI is English-only. Not accessible to public. |
 | **Lexicomp** | Institutional / ~$299/yr | English + some Spanish patient education | No | No | No | Deep data. No public multilingual checker. |
 | **NIH MedlinePlus** | Free | English + Spanish (static info pages only) | No | No | No | Has Spanish drug info pages but NO interactive interaction checker. |
-| **MedChex** | Free | **14 languages** | **Yes** | **Yes** | **Yes (Claude AI)** | Built for NYC underserved communities. |
+| **MedPharmChex** | Free | **14 languages** | **Yes** | **Yes** | **Yes (Claude AI)** | Built for NYC underserved communities. |
 
 ---
 
@@ -50,7 +50,7 @@ The partial Spanish support that exists (MedlinePlus static pages, Micromedex pa
 
 Every major tool assumes the user can read English at a 10th–12th grade level. None have designed for partial literacy or non-Latin scripts.
 
-| Feature | Drugs.com | Medscape | WebMD | Epocrates | Micromedex | **MedChex** |
+| Feature | Drugs.com | Medscape | WebMD | Epocrates | Micromedex | **MedPharmChex** |
 |---------|-----------|----------|-------|-----------|------------|------------|
 | Visual-first / icon UI | No | No | No | No | No | **Yes** |
 | Audio read-aloud | No | No | No | No | No | **Yes** |
@@ -84,10 +84,10 @@ After researching this space: **none exist.**
 
 ---
 
-## MedChex's Differentiated Position
+## MedPharmChex's Differentiated Position
 
 ```
-                    MARKET (all existing tools)     MEDCHEX
+                    MARKET (all existing tools)     MEDPHARMCHEX
 Languages:          English only                    14 languages incl. Nahuatl,
                     (partial Spanish static)        Yiddish, Bengali, Urdu
 
@@ -110,7 +110,7 @@ Target audience:    General English speakers        NYC underserved multilingual
 Community focus:    None                            Core mission
 ```
 
-### MedChex's unique value propositions (ranked by differentiation):
+### MedPharmChex's unique value propositions (ranked by differentiation):
 
 1. **First interactive drug interaction checker in Nahuatl** — no precedent for this anywhere in digital health
 2. **First to combine audio read-aloud with drug safety** for low-literacy populations
@@ -142,9 +142,9 @@ Community focus:    None                            Core mission
 
 ---
 
-## Final Table: Where MedChex Sits in the Market
+## Final Table: Where MedPharmChex Sits in the Market
 
-| Dimension | Market Leader | MedChex |
+| Dimension | Market Leader | MedPharmChex |
 |-----------|--------------|---------|
 | Languages | 1 (English) | 14 |
 | Low-literacy mode | None exists | Visual + Audio |

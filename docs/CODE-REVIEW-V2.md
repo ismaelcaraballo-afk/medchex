@@ -1,4 +1,4 @@
-# MedChex Code Review — Round 2
+# MedPharmChex Code Review — Round 2
 **Reviewers:** GPT-4o + DeepSeek
 **Scope:** Full stack — React frontend, Express backend, i18n system, VisualResult, drugApi
 
@@ -109,7 +109,7 @@ In `App.tsx`:
 
 ```js
 if (process.env.DEMO_MODE === 'true') {
-  console.warn('[MedChex] DEMO_MODE active — API calls are mocked')
+  console.warn('[MedPharmChex] DEMO_MODE active — API calls are mocked')
 }
 ```
 

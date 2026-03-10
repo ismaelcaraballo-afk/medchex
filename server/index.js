@@ -16,7 +16,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 }
 
 if (process.env.DEMO_MODE === 'true') {
-  console.warn('[MedChex] DEMO_MODE active — all API calls are mocked with pre-validated data')
+  console.warn('[MedPharmChex] DEMO_MODE active — all API calls are mocked with pre-validated data')
 }
 
 const app = express()
@@ -329,4 +329,4 @@ Use plain language. No medical jargon. Be direct and caring. Respond in ${langua
   }
 })
 
-app.listen(PORT, () => console.log(`MedChex backend running on :${PORT}`))
+app.listen(PORT, () => console.log(`MedPharmChex backend running on :${PORT}`))

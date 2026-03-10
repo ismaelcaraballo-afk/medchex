@@ -1,6 +1,6 @@
-# Lesson: Internationalization (i18n) — How MedChex Speaks 14 Languages
+# Lesson: Internationalization (i18n) — How MedPharmChex Speaks 14 Languages
 
-**Project:** MedChex
+**Project:** MedPharmChex
 **Concept:** Internationalization (i18n) + Localization (l10n) + Accessibility for low-literacy users
 **Stack used:** React 19 + TypeScript + react-i18next + i18next-browser-languagedetector + Web Speech API
 
@@ -19,7 +19,7 @@ You do i18n once. You do l10n for each language you support.
 
 ## The Problem We Were Solving
 
-Before this update, every piece of text in MedChex was hardcoded in English:
+Before this update, every piece of text in MedPharmChex was hardcoded in English:
 
 ```tsx
 // DrugSearch.tsx — BEFORE
@@ -187,7 +187,7 @@ detection: {
 }
 ```
 
-This means: if your iPhone is set to Spanish, MedChex opens in Spanish automatically.
+This means: if your iPhone is set to Spanish, MedPharmChex opens in Spanish automatically.
 
 ---
 
@@ -261,7 +261,7 @@ This is the most important accessibility decision in the project.
 
 **The problem:** Someone in the Puebloan community in the Bronx who speaks only Nahuatl may have never gone to school — not in Mexico, not in the US. They can't read Nahuatl text, Latin script, or any other writing system. A translated app is still useless to them.
 
-**The solution:** When Nahuatl is selected, MedChex switches from `ResultCard` (text-heavy) to `VisualResult` (reading-not-required).
+**The solution:** When Nahuatl is selected, MedPharmChex switches from `ResultCard` (text-heavy) to `VisualResult` (reading-not-required).
 
 ```tsx
 // App.tsx
@@ -348,7 +348,7 @@ For Nahuatl + VisualResult: the AI explanation is spoken aloud by the browser, s
 
 ## Key Concepts Learned
 
-| Concept | What it means | Where in MedChex |
+| Concept | What it means | Where in MedPharmChex |
 |---------|--------------|------------------|
 | `t('key')` | Look up translated string by key | Every component |
 | Interpolation `{{var}}` | Dynamic values in translations | `known_interactions`, `adverse_events` |
@@ -396,7 +396,7 @@ server/
 
 ## Try It Yourself
 
-1. `npm run dev` in the medchex folder
+1. `npm run dev` in the medpharmchex folder
 2. Open http://localhost:5173
 3. Switch to Spanish — whole UI changes instantly
 4. Switch to Arabic — layout mirrors right-to-left
@@ -550,7 +550,7 @@ module.exports = {
 
 > "We built this for the person who is standing at the pharmacy counter who doesn't speak English and doesn't read in any language. The app has to work for that person too."
 
-The VisualResult + audio combination means MedChex can be used by someone who:
+The VisualResult + audio combination means MedPharmChex can be used by someone who:
 - Has never been to school
 - Can't read in any language
 - Hands their phone to a family member to navigate to Nahuatl
@@ -560,5 +560,5 @@ That's the point of the whole feature.
 
 ---
 
-*Built: March 2026 — MedChex Capstone, Pursuit Cycle 4*
+*Built: March 2026 — MedPharmChex Capstone, Pursuit Cycle 4*
 *Stack: React 19 + TypeScript + react-i18next + i18next-browser-languagedetector + Web Speech API*

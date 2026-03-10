@@ -1,4 +1,4 @@
-# MedChex — Engineering Decisions Log
+# MedPharmChex — Engineering Decisions Log
 
 This document explains *why* each technical decision was made.
 Written for the team (Ismael + Paula) and for Demo Day Q&A.
@@ -51,7 +51,7 @@ Written for the team (Ismael + Paula) and for Demo Day Q&A.
 
 **Decision:** In production, CORS is locked to `FRONTEND_URL` only.
 
-**Why:** `cors()` with no config allows any website to call our backend. That means any other website could use our API (and our Anthropic credits) without our knowledge. Locking to our Vercel frontend URL means only MedChex can call MedChex.
+**Why:** `cors()` with no config allows any website to call our backend. That means any other website could use our API (and our Anthropic credits) without our knowledge. Locking to our Vercel frontend URL means only MedPharmChex can call MedPharmChex.
 
 ---
 

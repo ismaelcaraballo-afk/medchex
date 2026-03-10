@@ -1,12 +1,12 @@
-# MedChex — Mobile & Tablet Support
+# MedPharmChex — Mobile & Tablet Support
 
-**What this update does:** MedChex now works on phones, tablets, and computers. Before this, it was only designed for desktop screens. This document explains what changed and why it matters.
+**What this update does:** MedPharmChex now works on phones, tablets, and computers. Before this, it was only designed for desktop screens. This document explains what changed and why it matters.
 
 ---
 
-## Why This Matters for MedChex
+## Why This Matters for MedPharmChex
 
-MedChex is a drug interaction checker. The people who need it most — patients, caregivers, family members — are often checking medications on their phone at a pharmacy, or on a tablet at home. If the app only looks right on a laptop, we're cutting out the people we built it for.
+MedPharmChex is a drug interaction checker. The people who need it most — patients, caregivers, family members — are often checking medications on their phone at a pharmacy, or on a tablet at home. If the app only looks right on a laptop, we're cutting out the people we built it for.
 
 ---
 
@@ -19,7 +19,7 @@ Any modern smartphone — iPhone or Android. The app stacks everything in one co
 
 Each iPad model has a different screen size, so each gets its own layout:
 
-| iPad Model | Screen Size | What MedChex Does |
+| iPad Model | Screen Size | What MedPharmChex Does |
 |------------|-------------|-------------------|
 | **iPad Mini** (portrait) | Small tablet | Compact centered layout, large tap targets |
 | **iPad** (plain, 10th gen) | Medium tablet | Wider layout, comfortable reading width |
@@ -66,9 +66,9 @@ This means less scrolling and a faster experience — you type on the left and r
 
 ## How to Test It
 
-If you want to see how MedChex looks on a phone or tablet without having the device in hand:
+If you want to see how MedPharmChex looks on a phone or tablet without having the device in hand:
 
-1. Open MedChex in Chrome on your laptop
+1. Open MedPharmChex in Chrome on your laptop
 2. Right-click anywhere on the page → **Inspect**
 3. Click the phone/tablet icon at the top of the panel that opens
 4. Use the dropdown menu to pick a device (iPhone, iPad, Galaxy Tab, etc.)
@@ -79,7 +79,7 @@ You'll see the layout change in real time.
 
 ## Summary
 
-This update makes MedChex accessible to the actual patients and caregivers who need it — wherever they are, whatever device they have. It was built to meet people where they are, not to require them to be at a desk.
+This update makes MedPharmChex accessible to the actual patients and caregivers who need it — wherever they are, whatever device they have. It was built to meet people where they are, not to require them to be at a desk.
 
 ---
 
