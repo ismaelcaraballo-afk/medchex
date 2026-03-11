@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import Anthropic from '@anthropic-ai/sdk'
-import fetch from 'node-fetch'
 import rateLimit from 'express-rate-limit'
 import NodeCache from 'node-cache'
 
