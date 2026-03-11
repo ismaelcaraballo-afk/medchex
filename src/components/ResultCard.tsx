@@ -14,8 +14,8 @@ interface ResultCardProps {
 }
 
 const severityConfig = {
-  SAFE:      { color: '#22c55e', bg: '#052e16' },
-  CAUTION:   { color: '#f59e0b', bg: '#2d1a00' },
+  SAFE:      { color: '#4CAF50', bg: '#0d3a1a' },
+  CAUTION:   { color: '#D4AF37', bg: '#3a2d0a' },
   DANGEROUS: { color: '#ef4444', bg: '#2d0a0a' },
 }
 

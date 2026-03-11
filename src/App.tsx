@@ -4,6 +4,7 @@ import DrugSearch from './components/DrugSearch'
 import ResultCard from './components/ResultCard'
 import VisualResult from './components/VisualResult'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import { FloatingElementsBackground } from './components/FloatingElements'
 import { getRxCUI, getInteractions, scoreInteractions, explainInteractions, getFAERS } from './services/drugApi'
 import { RTL_LANGS } from './i18n'
 import './App.css'
@@ -84,8 +85,12 @@ export default function App() {
 
   return (
     <div className="app" dir={dir}>
+      <FloatingElementsBackground />
       <header className="app-header">
         <div className="app-header-top">
+          <div className="app-logo-container">
+            <img src="/medRxchex-logo.jpg" alt="MedRxChex Logo" className="app-logo" />
+          </div>
           <LanguageSwitcher />
         </div>
         <h1>{t('header.title')}</h1>
