@@ -102,6 +102,14 @@ export default function App() {
           )}
         </div>
 
+        {/* Loading spinner — shown while API calls are in flight */}
+        {loading && (
+          <div className="loading-spinner" aria-label="Checking interactions…">
+            <div className="spinner-ring" />
+            <span>{t('search.checking')}</span>
+          </div>
+        )}
+
         {/* Results region — announced when content appears */}
         <div aria-live="polite" aria-atomic="false">
         {result && visualFirst && (
