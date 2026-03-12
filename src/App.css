@@ -59,22 +59,21 @@ body {
 .app-logo-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
 .app-logo {
-  height: 60px;
+  height: 120px;
   width: auto;
   object-fit: contain;
-  margin-bottom: 1rem;
 }
 
 /* Language Switcher */
 .app-header-top {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
 }
 .lang-switcher { display: flex; align-items: center; gap: 0.5rem; }
 .lang-label { color: #475569; font-size: 0.75rem; }
@@ -97,15 +96,80 @@ body {
 [dir="rtl"] .severity-badge { flex-direction: row-reverse; }
 
 /* Header */
-.app-header { text-align: center; }
-.app-header h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--brand-navy);
-  margin: 0 0 0.5rem;
-  letter-spacing: -0.02em;
+.app-header { 
+  text-align: center; 
+  background: linear-gradient(135deg, rgba(0, 63, 127, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  border: 2px solid var(--brand-gold);
+  box-shadow: 0 10px 30px rgba(0, 63, 127, 0.15);
+  position: relative;
+  overflow: hidden;
 }
-.app-header p { color: var(--brand-gold); margin: 0; font-size: 1rem; font-weight: 600; }
+
+.app-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.app-header-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.app-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.app-logo {
+  height: 140px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(212, 175, 55, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.app-logo:hover {
+  transform: scale(1.05);
+}
+
+.app-header h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0.5rem 0 0.75rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(0, 63, 127, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.app-header p { 
+  color: var(--brand-gold);
+  margin: 0; 
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1;
+}
 
 /* Main */
 .app-main {
@@ -137,6 +201,8 @@ body {
   color: #e2e8f0;
   font-size: 0.95rem;
   outline: none;
+  transition: border-color 0.15s;
+}
 .drug-input:focus { border-color: var(--brand-gold); }
 .drug-input:disabled { opacity: 0.5; }
 .remove-btn {
@@ -615,4 +681,235 @@ body {
     }
     .add-btn:hover { background: rgba(56, 189, 248, 0.08); }
   }
+}
+
+/* ============================================================
+   MEDCHEX REDESIGN — appended overrides & new components
+   ============================================================ */
+
+/* App container: sit above floating pills */
+.app {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 48px; /* room for disclaimer ticker */
+}
+
+/* ── Logo container — 2:3 portrait, white bg so mix-blend-mode removes logo's own white ── */
+.app-logo-container {
+  width: 180px;
+  height: 270px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 3px solid rgba(212, 175, 55, 0.7);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.7),
+    0 5px 0 rgba(0, 0, 0, 0.5),
+    0 -1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 18px;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.app-logo-container:hover {
+  transform: scale(1.04) translateY(-6px);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.8),
+    0 8px 0 rgba(0, 0, 0, 0.55),
+    0 -1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ── Embossed Logo ────────────────────────────────────────── */
+.app-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* multiply: white in logo × white container = white (logo bg invisible) — colors preserved */
+  mix-blend-mode: multiply;
+  transition: transform 0.35s ease;
+}
+
+.app-logo:hover {
+  transform: none; /* hover handled by container */
+}
+
+/* Tagline — two sizes below h1 (3.2rem → 1.5rem) */
+.app-tagline {
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(212, 175, 55, 0.85);
+  margin: 0.2rem 0 0;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* Embossed h1 title */
+.app-header h1 {
+  font-size: 3.2rem;
+  filter:
+    drop-shadow(0 3px 0 rgba(0, 0, 0, 0.8))
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+}
+
+/* Header: deeper shadow so it feels elevated from the pill background */
+.app-header {
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 -2px 0 rgba(0, 0, 0, 0.3) inset;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Loading Bar ──────────────────────────────────────────── */
+.loading-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.5rem 1.75rem;
+  background: #1e2330;
+  border: 1px solid #2d3748;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Step dots row */
+.lbd-dots {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.lbd-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #0f1117;
+  border: 2px solid #374151;
+  color: #4b5563;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.lbd-dot.lbd-done {
+  background: var(--brand-green);
+  border-color: var(--brand-green);
+  color: #fff;
+}
+
+.lbd-dot.lbd-active {
+  background: rgba(0, 63, 127, 0.4);
+  border-color: var(--brand-gold);
+  color: var(--brand-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2), 0 0 12px rgba(212, 175, 55, 0.3);
+}
+
+/* Progress track */
+.lbd-track {
+  height: 14px;
+  background: #0f1117;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #2d3748;
+}
+
+.lbd-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-navy) 0%, var(--brand-gold) 100%);
+  border-radius: 999px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.lbd-glow {
+  height: 100%;
+  background: linear-gradient(90deg, transparent 60%, rgba(255, 255, 255, 0.35));
+  border-radius: 999px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* Current step label */
+.lbd-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  color: var(--brand-gold);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ── Disclaimer Ticker ────────────────────────────────────── */
+.disclaimer-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: rgba(0, 8, 20, 0.93);
+  border-top: 1px solid rgba(212, 175, 55, 0.25);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  z-index: 500;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.disclaimer-ticker-inner {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: ticker-scroll 45s linear infinite;
+}
+
+.disclaimer-ticker-text {
+  color: rgba(212, 175, 55, 0.7);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  padding-right: 5rem;
+}
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Result action buttons ────────────────────────────────── */
+.result-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Phone / mobile responsive adjustments */
+@media (max-width: 599px) {
+  .app-logo-container { width: 120px; height: 180px; padding: 12px; }
+  .app-header h1 { font-size: 2rem; }
+  .loading-bar-container { padding: 1rem 1.25rem; }
+  .lbd-dot     { width: 26px; height: 26px; font-size: 0.65rem; }
+  .lbd-label   { font-size: 0.8rem; }
+  .disclaimer-ticker { height: 28px; }
+  .disclaimer-ticker-text { font-size: 0.65rem; }
+  .result-actions { justify-content: stretch; }
+  .result-actions .print-btn { flex: 1; text-align: center; }
 }

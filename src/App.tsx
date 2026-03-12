@@ -4,6 +4,7 @@ import DrugSearch from './components/DrugSearch'
 import ResultCard from './components/ResultCard'
 import VisualResult from './components/VisualResult'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import LoadingBar from './components/LoadingBar'
 import { FloatingElementsBackground } from './components/FloatingElements'
 import { getRxCUI, getInteractions, scoreInteractions, explainInteractions, getFAERS } from './services/drugApi'
 import { RTL_LANGS } from './i18n'
@@ -21,9 +22,12 @@ interface CheckResult {
 // All other languages (including Arabic, Hindi, Urdu) get the full ResultCard with optional audio.
 const VISUAL_FIRST_LANGS = new Set(['nah'])
 
+const DISCLAIMER = '⚕ This site does not cure, treat or diagnose. For information purposes only. Contact your physician for medical advice. \u00a0\u00a0\u00a0 ⚕ MedRxChex provides drug interaction data from NIH RxNorm and FDA FAERS. Always consult your healthcare provider before changing medications. \u00a0\u00a0\u00a0 ⚕ This site does not cure, treat or diagnose. For information purposes only. Contact your physician for medical advice. \u00a0\u00a0\u00a0'
+
 export default function App() {
   const { t, i18n } = useTranslation()
   const [loading, setLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<CheckResult | null>(null)
 
@@ -31,6 +35,7 @@ export default function App() {
     setLoading(true)
     setError(null)
     setResult(null)
+    setLoadingStep(1)
 
     try {
       // Step 1: Resolve each drug name to RxCUI
@@ -45,12 +50,14 @@ export default function App() {
       }
 
       // Step 2: Get interactions
+      setLoadingStep(2)
       const interactionData = await getInteractions(rxcuis)
       const pairs = interactionData.fullInteractionTypeGroup
         ?.flatMap((g: any) => g.fullInteractionType ?? [])
         ?.flatMap((t: any) => t.interactionPair ?? []) ?? []
 
       // Step 3: Score severity
+      setLoadingStep(3)
       const scoreData = await scoreInteractions(pairs)
       // Get highest severity from scored array (priority: DANGEROUS > CAUTION > SAFE)
       const severityPriority = { DANGEROUS: 3, CAUTION: 2, SAFE: 1 }
@@ -61,10 +68,12 @@ export default function App() {
       }, 'SAFE') ?? 'SAFE'
 
       // Step 4: AI explanation — pass language so Claude responds in it
+      setLoadingStep(4)
       const explainData = await explainInteractions(drugs, pairs, severity, i18n.language)
       const explanation: string = explainData.explanation ?? ''
 
       // Step 5: FAERS adverse event count
+      setLoadingStep(5)
       const faersData = await getFAERS(drugs[0])
       const faersCount: number = faersData.total ?? 0
 
@@ -76,6 +85,7 @@ export default function App() {
       console.error(err)
     } finally {
       setLoading(false)
+      setLoadingStep(0)
     }
   }
 
@@ -86,60 +96,68 @@ export default function App() {
   return (
     <div className="app" dir={dir}>
       <FloatingElementsBackground />
+
       <header className="app-header">
         <div className="app-header-top">
-          <div className="app-logo-container">
-            <img src="/medRxchex-logo.jpg" alt="MedRxChex Logo" className="app-logo" />
-          </div>
           <LanguageSwitcher />
         </div>
-        <h1>{t('header.title')}</h1>
-        <p>{t('header.subtitle')}</p>
+        <div className="app-logo-container">
+          <img src="/medRxchex-logo.jpg" alt="MedRxChex Logo" className="app-logo" />
+        </div>
+        <p className="app-tagline">Your MedRx Discovery Card.</p>
+        <h1>MedRxChex</h1>
       </header>
 
       <main className="app-main">
         <DrugSearch onCheck={handleCheck} loading={loading} />
 
-        {/* aria-live: screen readers announce errors and results without user navigating to them */}
+        {/* aria-live: screen readers announce errors without user navigating */}
         <div aria-live="polite" aria-atomic="true">
           {error && (
             <div className="error-banner" role="alert">{error}</div>
           )}
         </div>
 
-        {/* Loading spinner — shown while API calls are in flight */}
+        {/* Real-time step loading bar — replaces old spinner */}
         {loading && (
-          <div className="loading-spinner" aria-label="Checking interactions…">
-            <div className="spinner-ring" />
-            <span>{t('search.checking')}</span>
+          <div aria-label="Checking interactions…" aria-live="polite">
+            <LoadingBar step={loadingStep} />
           </div>
         )}
 
         {/* Results region — announced when content appears */}
         <div aria-live="polite" aria-atomic="false">
-        {result && visualFirst && (
-          <VisualResult
-            severity={result.severity}
-            drugs={result.drugs}
-            explanation={result.explanation}
-          />
-        )}
+          {result && visualFirst && (
+            <VisualResult
+              severity={result.severity}
+              drugs={result.drugs}
+              explanation={result.explanation}
+            />
+          )}
 
-        {result && !visualFirst && (
-          <ResultCard
-            drugs={result.drugs}
-            severity={result.severity}
-            explanation={result.explanation}
-            interactions={result.interactions}
-            faersCount={result.faersCount}
-          />
-        )}
+          {result && !visualFirst && (
+            <ResultCard
+              drugs={result.drugs}
+              severity={result.severity}
+              explanation={result.explanation}
+              interactions={result.interactions}
+              faersCount={result.faersCount}
+            />
+          )}
         </div>
       </main>
 
       <footer className="app-footer">
         {t('footer')}
       </footer>
+
+      {/* Disclaimer ticker — fixed at bottom of every view */}
+      <div className="disclaimer-ticker" role="note" aria-label="Medical disclaimer">
+        <div className="disclaimer-ticker-inner">
+          <span className="disclaimer-ticker-text">{DISCLAIMER}</span>
+          <span className="disclaimer-ticker-text" aria-hidden="true">{DISCLAIMER}</span>
+        </div>
+      </div>
     </div>
   )
 }

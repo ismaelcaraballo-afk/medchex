@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import PharmacistCard from './PharmacistCard'
 
 interface Interaction {
   description: string
@@ -21,10 +23,39 @@ const severityConfig = {
 
 export default function ResultCard({ drugs, severity, explanation, interactions, faersCount }: ResultCardProps) {
   const { t } = useTranslation()
+  const [showPharmacist, setShowPharmacist] = useState(false)
   const config = severityConfig[severity as keyof typeof severityConfig] ?? severityConfig.CAUTION
   const severityLabel = t(`severity.${severity}`, severity)
 
   const handlePrint = () => window.print()
+
+  // Web Share API for mobile "save to phone" — falls back to print on desktop
+  const handleSave = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `MedRxChex: ${drugs.join(' + ')}`,
+          text: [
+            `Drug Interaction Check`,
+            `Medications: ${drugs.join(' + ')}`,
+            `Result: ${severity}`,
+            '',
+            explanation,
+            '',
+            `⚕ For information purposes only. Contact your physician for medical advice.`,
+            `Data: NIH RxNorm · FDA FAERS · Anthropic Claude`,
+          ].join('\n'),
+        })
+      } catch {
+        // User cancelled or share failed — fall back to print
+        window.print()
+      }
+    } else {
+      window.print()
+    }
+  }
+
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   return (
     <div className="result-card" id="print-result">
@@ -72,10 +103,23 @@ export default function ResultCard({ drugs, severity, explanation, interactions,
         {t('result.disclaimer')}
       </p>
 
-      {/* Print / Save button */}
-      <button className="print-btn no-print" onClick={handlePrint}>
-        🖨 {t('result.print_btn')}
-      </button>
+      {/* Action buttons */}
+      <div className="result-actions no-print">
+        <button className="print-btn" onClick={() => setShowPharmacist(true)}>
+          💊 Show Pharmacist
+        </button>
+        <button className="print-btn" onClick={handleSave}>
+          {canShare ? '📱 Save / Share' : '🖨 Print / Save PDF'}
+        </button>
+      </div>
+
+      {showPharmacist && (
+        <PharmacistCard
+          drugs={drugs}
+          severity={severity}
+          onClose={() => setShowPharmacist(false)}
+        />
+      )}
     </div>
   )
 }
