@@ -1,4 +1,5 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+// Dev: Vite proxy routes /api → localhost:3001 (no CORS needed). Prod: set VITE_API_URL.
+const BASE = import.meta.env.VITE_API_URL || '/api'
 
 // WHY: Central fetch helper — checks HTTP status before parsing JSON.
 // Without this, a 500 from the backend returns silently as a malformed object,
