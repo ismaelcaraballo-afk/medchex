@@ -7,10 +7,9 @@ import NodeCache from 'node-cache'
 
 dotenv.config()
 
-// WHY: Fail fast if required env vars are missing.
-// A cryptic "Cannot read properties of undefined" mid-demo is worse than a clear startup error.
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('ERROR: ANTHROPIC_API_KEY is not set. Add it to your .env file.')
+// WHY: Fail fast if required env vars are missing — unless DEMO_MODE is on (no live calls needed).
+if (!process.env.ANTHROPIC_API_KEY && process.env.DEMO_MODE !== 'true') {
+  console.error('ERROR: ANTHROPIC_API_KEY is not set. Add it to .env, or set DEMO_MODE=true to test.')
   process.exit(1)
 }
 
