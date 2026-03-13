@@ -368,8 +368,9 @@ app.post('/api/explain', async (req, res) => {
 
   const languageName = LANG_NAMES[lang] || 'English'
 
-  // DEMO_MODE: return pre-written explanation for known demo pairs — no Anthropic call needed
-  if (process.env.DEMO_MODE === 'true') {
+  // DEMO_MODE: use pre-written English explanation only — for non-English, still call Claude
+  // so the explanation actually comes back in the selected language (not English read with a foreign accent)
+  if (process.env.DEMO_MODE === 'true' && (lang === 'en' || !lang)) {
     const demoKey = drugs.map(d => d.toLowerCase()).sort().join(',')
     const demoExplanation = DEMO_EXPLANATIONS[demoKey]
     if (demoExplanation) return res.json({ explanation: demoExplanation })

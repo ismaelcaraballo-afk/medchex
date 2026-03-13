@@ -21,7 +21,7 @@ import nah from './locales/nah.json'
 const loadPlaceholder = async (code: string) => {
   try {
     const mod = await import(`./locales/${code}.json`)
-    i18n.addResourceBundle(code, 'translation', mod.default, true, true)
+    i18n.addResourceBundle(code, 'translation', mod.default ?? mod, true, true)
   } catch (err) {
     console.error(`[i18n] Failed to load placeholder language: ${code}`, err)
   }
@@ -65,7 +65,20 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: { en, es, zh, hi, ar, bn, pt, ru, fr, ur, yi, nah },
+    resources: {
+      en:  { translation: en  },
+      es:  { translation: es  },
+      zh:  { translation: zh  },
+      hi:  { translation: hi  },
+      ar:  { translation: ar  },
+      bn:  { translation: bn  },
+      pt:  { translation: pt  },
+      ru:  { translation: ru  },
+      fr:  { translation: fr  },
+      ur:  { translation: ur  },
+      yi:  { translation: yi  },
+      nah: { translation: nah },
+    },
     // Nahuatl speakers are far more likely to have Spanish-speaking family
     // than English-speaking family — fall back to Spanish before English
     fallbackLng: {
