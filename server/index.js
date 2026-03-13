@@ -107,21 +107,21 @@ const DEMO_INTERACTION_RAW = {
 // Live API calls during a presentation are a single point of failure.
 // If OpenFDA is slow or down on March 18, DEMO_MODE keeps the demo running perfectly.
 const DEMO_INTERACTIONS = {
-  'warfarin,ibuprofen': {
+  'ibuprofen,warfarin': {
     scored: [{
       drug1: 'Warfarin', drug2: 'Ibuprofen',
       description: 'Ibuprofen may increase the anticoagulant effect of warfarin, raising the risk of serious or fatal bleeding.',
       severity: 'DANGEROUS'
     }]
   },
-  'warfarin,aspirin': {
+  'aspirin,warfarin': {
     scored: [{
       drug1: 'Warfarin', drug2: 'Aspirin',
       description: 'Concurrent use significantly increases bleeding risk. Contraindicated in most patients.',
       severity: 'DANGEROUS'
     }]
   },
-  'lisinopril,ibuprofen': {
+  'ibuprofen,lisinopril': {
     scored: [{
       drug1: 'Lisinopril', drug2: 'Ibuprofen',
       description: 'NSAIDs like ibuprofen may reduce the antihypertensive effect of lisinopril and increase risk of kidney injury.',
@@ -139,19 +139,19 @@ const DEMO_FAERS = {
   'aspirin': 35000,
 }
 
-// Pre-written explanations for demo drug pairs — avoids live Anthropic call during presentation
+// Pre-written explanations for demo drug pairs — keys are sorted alphabetically to match drugs.sort().join(',')
 const DEMO_EXPLANATIONS = {
-  'warfarin,ibuprofen': `Warfarin is a blood thinner, and ibuprofen is a common anti-inflammatory painkiller. When taken together, ibuprofen can increase the blood-thinning effect of warfarin significantly, raising your risk of serious or life-threatening bleeding — including internal bleeding you might not notice.
+  'ibuprofen,warfarin': `Warfarin is a blood thinner, and ibuprofen is a common anti-inflammatory painkiller. When taken together, ibuprofen can increase the blood-thinning effect of warfarin significantly, raising your risk of serious or life-threatening bleeding — including internal bleeding you might not notice.
 
 This combination is considered dangerous. The risk is real even with a single dose of ibuprofen.
 
 Do not take these medications together without speaking to your doctor or pharmacist first. If you need pain relief, ask about safer alternatives like acetaminophen (Tylenol). If you experience unusual bruising, prolonged bleeding, or blood in your urine or stool, seek medical attention immediately.`,
-  'warfarin,aspirin': `Warfarin and aspirin both affect how your blood clots, but in different ways. Taking them together significantly increases your risk of serious bleeding — including in your stomach, brain, or other internal organs.
+  'aspirin,warfarin': `Warfarin and aspirin both affect how your blood clots, but in different ways. Taking them together significantly increases your risk of serious bleeding — including in your stomach, brain, or other internal organs.
 
 This combination is generally contraindicated, meaning most patients should not take them together unless specifically directed by a physician for a particular medical condition.
 
 Contact your doctor before combining these medications. Do not stop either medication on your own without medical guidance.`,
-  'lisinopril,ibuprofen': `Lisinopril is a blood pressure medication, and ibuprofen is a common anti-inflammatory pain reliever. Ibuprofen can reduce how well lisinopril controls your blood pressure, and the combination can also put extra stress on your kidneys.
+  'ibuprofen,lisinopril': `Lisinopril is a blood pressure medication, and ibuprofen is a common anti-inflammatory pain reliever. Ibuprofen can reduce how well lisinopril controls your blood pressure, and the combination can also put extra stress on your kidneys.
 
 This is a moderate interaction worth discussing with your doctor or pharmacist, especially if you take ibuprofen regularly.
 
@@ -316,7 +316,7 @@ app.post('/api/score', async (req, res) => {
   // WHY: Check DEMO_MODE — if flagged, return pre-validated data for common demo pairs.
   // Normalize to lowercase so "Warfarin,Ibuprofen" matches "warfarin,ibuprofen" in the table.
   if (process.env.DEMO_MODE === 'true') {
-    const demoKey = interactionPairs.map(p => p.drug1?.toLowerCase()).sort().join(',')
+    const demoKey = interactionPairs.flatMap(p => [p.drug1?.toLowerCase(), p.drug2?.toLowerCase()]).filter(Boolean).sort().join(',')
     const demoResult = DEMO_INTERACTIONS[demoKey]
     if (demoResult) return res.json(demoResult)
   }
