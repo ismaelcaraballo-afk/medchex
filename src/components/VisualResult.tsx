@@ -74,7 +74,7 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [showPharmacist, setShowPharmacist] = useState(false)
-  const [autoPlayEnabled, setAutoPlayEnabled] = useState(true)
+  const [autoPlayEnabled, setAutoPlayEnabled] = useState(false)
 
   // Haptic feedback on result load — felt without reading or hearing
   useEffect(() => {

@@ -312,6 +312,9 @@ app.post('/api/score', async (req, res) => {
   if (!Array.isArray(interactionPairs)) {
     return res.status(400).json({ error: 'interactionPairs must be an array.' })
   }
+  if (interactionPairs.length > 20) {
+    return res.status(400).json({ error: 'Too many interaction pairs.' })
+  }
 
   // WHY: Check DEMO_MODE — if flagged, return pre-validated data for common demo pairs.
   // Normalize to lowercase so "Warfarin,Ibuprofen" matches "warfarin,ibuprofen" in the table.
@@ -323,14 +326,16 @@ app.post('/api/score', async (req, res) => {
 
   try {
     const scored = interactionPairs.map(pair => {
-      const desc = (pair.description || '').toLowerCase()
+      if (!pair || typeof pair !== 'object') return { severity: 'SAFE' }
+      const { description = '', drug1 = '', drug2 = '' } = pair
+      const desc = (typeof description === 'string' ? description : '').toLowerCase()
       let severity = 'SAFE'
-      if (desc.includes('contraindicated') || desc.includes('serious') || desc.includes('fatal') || desc.includes('death')) {
+      if (desc.includes('contraindicated') || desc.includes('serious') || desc.includes('fatal') || desc.includes('death') || desc.includes('severe') || desc.includes('life-threatening')) {
         severity = 'DANGEROUS'
       } else if (desc.includes('moderate') || desc.includes('caution') || desc.includes('monitor') || desc.includes('may increase')) {
         severity = 'CAUTION'
       }
-      return { ...pair, severity }
+      return { description, drug1, drug2, severity }
     })
     res.json({ scored })
   } catch (err) {
@@ -357,6 +362,9 @@ app.post('/api/explain', async (req, res) => {
   if (!Array.isArray(drugs) || drugs.length === 0) {
     return res.status(400).json({ error: 'drugs array is required.' })
   }
+  if (drugs.length > 5 || !drugs.every(d => typeof d === 'string' && d.length <= 100)) {
+    return res.status(400).json({ error: 'Invalid drugs array.' })
+  }
 
   const languageName = LANG_NAMES[lang] || 'English'
 
@@ -378,7 +386,7 @@ Respond entirely in ${languageName}. Use plain language appropriate for that lan
 
 Medications entered: ${drugs.join(', ')}
 Severity level determined by FDA data: ${severity}
-Interactions found (from FDA/RxNorm data): ${JSON.stringify(interactions)}
+Interactions found (from FDA/RxNorm data): ${JSON.stringify(interactions).slice(0, 4000)}
 
 In 2-3 short paragraphs:
 1. What the interaction is and what body systems are affected

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DrugSearch from './components/DrugSearch'
 import ResultCard from './components/ResultCard'
@@ -18,9 +18,8 @@ interface CheckResult {
   faersCount?: number
 }
 
-// Visual-first mode: Nahuatl only — non-literate speakers who may not read any script.
-// All other languages (including Arabic, Hindi, Urdu) get the full ResultCard with optional audio.
-const VISUAL_FIRST_LANGS = new Set(['nah'])
+// Visual-first mode: shown for ALL languages — color/symbol is universally useful regardless of literacy.
+// ResultCard still renders below for full text details.
 
 const DISCLAIMER = '⚕ This site does not cure, treat or diagnose. For information purposes only. Contact your physician for medical advice. \u00a0\u00a0\u00a0 ⚕ MedRxChex provides drug interaction data from NIH RxNorm and FDA FAERS. Always consult your healthcare provider before changing medications. \u00a0\u00a0\u00a0 ⚕ This site does not cure, treat or diagnose. For information purposes only. Contact your physician for medical advice. \u00a0\u00a0\u00a0'
 
@@ -76,7 +75,7 @@ export default function App() {
       // Step 5: FAERS adverse event count
       setLoadingStep(5)
       const faersData = await getFAERS(drugs[0])
-      const faersCount: number = faersData.meta?.results?.total ?? 0
+      const faersCount: number = faersData.total ?? faersData.meta?.results?.total ?? 0
 
       setResult({ drugs, severity, explanation, interactions: pairs, faersCount })
 
@@ -92,7 +91,6 @@ export default function App() {
 
   const lang = i18n.language.split('-')[0]
   const dir = RTL_LANGS.has(lang) ? 'rtl' : 'ltr'
-  const visualFirst = useMemo(() => VISUAL_FIRST_LANGS.has(lang), [lang])
 
   return (
     <div className="app" dir={dir}>
@@ -126,9 +124,9 @@ export default function App() {
           </div>
         )}
 
-        {/* Results region — announced when content appears */}
+        {/* Results region — VisualResult (color/symbol) always on top, full details below */}
         <div aria-live="polite" aria-atomic="false">
-          {result && visualFirst && (
+          {result && (
             <VisualResult
               severity={result.severity}
               drugs={result.drugs}
@@ -136,7 +134,7 @@ export default function App() {
             />
           )}
 
-          {result && !visualFirst && (
+          {result && (
             <ResultCard
               drugs={result.drugs}
               severity={result.severity}
