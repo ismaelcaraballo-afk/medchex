@@ -11,11 +11,11 @@
     "add_drug": "+ 薬を追加",
     "check_btn": "相互作用を確認",
     "checking": "確認中...",
-    "step_lookup": "Looking up medications",
-    "step_interactions": "Finding interactions",
-    "step_scoring": "Scoring severity",
-    "step_explanation": "Generating explanation",
-    "step_adverse": "Checking adverse events"
+    "step_lookup": "薬を検索中",
+    "step_interactions": "相互作用を検索中",
+    "step_scoring": "重症度を評価中",
+    "step_explanation": "説明を生成中",
+    "step_adverse": "副作用を確認中"
   },
   "result": {
     "what_it_means": "これが意味すること",

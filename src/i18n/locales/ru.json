@@ -11,11 +11,11 @@
     "add_drug": "+ Добавить препарат",
     "check_btn": "Проверить взаимодействия",
     "checking": "Проверяем...",
-    "step_lookup": "Looking up medications",
-    "step_interactions": "Finding interactions",
-    "step_scoring": "Scoring severity",
-    "step_explanation": "Generating explanation",
-    "step_adverse": "Checking adverse events"
+    "step_lookup": "Поиск лекарств",
+    "step_interactions": "Поиск взаимодействий",
+    "step_scoring": "Оценка серьёзности",
+    "step_explanation": "Генерация объяснения",
+    "step_adverse": "Проверка нежелательных явлений"
   },
   "result": {
     "what_it_means": "Что это означает",

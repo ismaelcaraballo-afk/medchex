@@ -11,11 +11,11 @@
     "add_drug": "+ दवा जोड़ें",
     "check_btn": "इंटरैक्शन जाँचें",
     "checking": "जाँच हो रही है...",
-    "step_lookup": "Looking up medications",
-    "step_interactions": "Finding interactions",
-    "step_scoring": "Scoring severity",
-    "step_explanation": "Generating explanation",
-    "step_adverse": "Checking adverse events"
+    "step_lookup": "दवाइयाँ खोज रहे हैं",
+    "step_interactions": "इंटरैक्शन ढूंढ रहे हैं",
+    "step_scoring": "गंभीरता का मूल्यांकन",
+    "step_explanation": "स्पष्टीकरण तैयार हो रहा है",
+    "step_adverse": "प्रतिकूल घटनाओं की जाँच"
   },
   "result": {
     "what_it_means": "इसका क्या मतलब है",

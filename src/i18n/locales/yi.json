@@ -11,11 +11,11 @@
     "add_drug": "+ צולייגן אַ מעדיקאַמענט",
     "check_btn": "בודקן די שייכות",
     "checking": "בודקט זיך...",
-    "step_lookup": "Looking up medications",
-    "step_interactions": "Finding interactions",
-    "step_scoring": "Scoring severity",
-    "step_explanation": "Generating explanation",
-    "step_adverse": "Checking adverse events"
+    "step_lookup": "זוכן מעדיצינען",
+    "step_interactions": "זוכן ווייטשסלוואירקונגען",
+    "step_scoring": "אפשאצן ערנסטקייט",
+    "step_explanation": "דערקלערונג ווערט צוגעגרייט",
+    "step_adverse": "קאנטראלירן שעדלעכע ווירקונגען"
   },
   "result": {
     "what_it_means": "וואָס דאָס מיינט",

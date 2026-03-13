@@ -11,11 +11,11 @@
     "add_drug": "+ Medikament hinzufügen",
     "check_btn": "Wechselwirkungen prüfen",
     "checking": "Prüfung läuft...",
-    "step_lookup": "Looking up medications",
-    "step_interactions": "Finding interactions",
-    "step_scoring": "Scoring severity",
-    "step_explanation": "Generating explanation",
-    "step_adverse": "Checking adverse events"
+    "step_lookup": "Medikamente werden gesucht",
+    "step_interactions": "Wechselwirkungen werden gesucht",
+    "step_scoring": "Schweregrad bewerten",
+    "step_explanation": "Erklärung wird erstellt",
+    "step_adverse": "Nebenwirkungen werden geprüft"
   },
   "result": {
     "what_it_means": "Was das bedeutet",
