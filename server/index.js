@@ -49,6 +49,54 @@ const cache = new NodeCache({ stdTTL: 3600 })
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+// Maps RxCUI codes → drug names for DEMO_MODE interaction lookups
+const DEMO_RXCUI_MAP = {
+  '11289': 'warfarin',
+  '5640':  'ibuprofen',
+  '1191':  'aspirin',
+  '29046': 'lisinopril',
+}
+
+// Raw interaction data in RxNorm fullInteractionTypeGroup format — used by /api/interactions in DEMO_MODE
+const DEMO_INTERACTION_RAW = {
+  'ibuprofen,warfarin': {
+    fullInteractionTypeGroup: [{
+      fullInteractionType: [{
+        interactionPair: [{
+          description: 'Ibuprofen may increase the anticoagulant effect of warfarin, raising the risk of serious or fatal bleeding.',
+          severity: 'high',
+          drug1: 'Warfarin',
+          drug2: 'Ibuprofen',
+        }]
+      }]
+    }]
+  },
+  'aspirin,warfarin': {
+    fullInteractionTypeGroup: [{
+      fullInteractionType: [{
+        interactionPair: [{
+          description: 'Concurrent use significantly increases bleeding risk. Contraindicated in most patients.',
+          severity: 'high',
+          drug1: 'Warfarin',
+          drug2: 'Aspirin',
+        }]
+      }]
+    }]
+  },
+  'ibuprofen,lisinopril': {
+    fullInteractionTypeGroup: [{
+      fullInteractionType: [{
+        interactionPair: [{
+          description: 'NSAIDs like ibuprofen may reduce the antihypertensive effect of lisinopril and increase risk of kidney injury.',
+          severity: 'moderate',
+          drug1: 'Lisinopril',
+          drug2: 'Ibuprofen',
+        }]
+      }]
+    }]
+  },
+}
+
 // WHY: DEMO_MODE pre-returns cached real data for our Demo Day drug pairs.
 // Live API calls during a presentation are a single point of failure.
 // If OpenFDA is slow or down on March 18, DEMO_MODE keeps the demo running perfectly.
@@ -181,6 +229,14 @@ app.get('/api/interactions', async (req, res) => {
   const cuiList = rxcuis.split(',').map(s => s.trim())
   if (!cuiList.every(cui => /^\d+$/.test(cui))) {
     return res.status(400).json({ error: 'All RxCUI values must be numeric.' })
+  }
+
+  // DEMO_MODE: map RxCUI codes → drug names, look up pre-built interaction data
+  if (process.env.DEMO_MODE === 'true') {
+    const drugNames = cuiList.map(cui => DEMO_RXCUI_MAP[cui]).filter(Boolean)
+    const demoKey = drugNames.sort().join(',')
+    const demoResult = DEMO_INTERACTION_RAW[demoKey]
+    if (demoResult) return res.json(demoResult)
   }
 
   const cacheKey = `interactions:${cuiList.sort().join(',')}`
