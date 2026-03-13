@@ -10,7 +10,12 @@
     "placeholder_n": "दवा {{n}} (जैसे Aspirin)",
     "add_drug": "+ दवा जोड़ें",
     "check_btn": "इंटरैक्शन जाँचें",
-    "checking": "जाँच हो रही है..."
+    "checking": "जाँच हो रही है...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "इसका क्या मतलब है",

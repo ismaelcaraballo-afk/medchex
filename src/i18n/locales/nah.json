@@ -10,7 +10,12 @@
     "placeholder_n": "Pahtli {{n}} (huan Aspirin)",
     "add_drug": "+ Ticchihua ce pahtli",
     "check_btn": "Xiquitta in pahpahme",
-    "checking": "Tiquitta..."
+    "checking": "Tiquitta...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "Tlen quihtoa nochi",

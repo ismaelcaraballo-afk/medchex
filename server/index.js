@@ -13,6 +13,13 @@ if (!process.env.ANTHROPIC_API_KEY && process.env.DEMO_MODE !== 'true') {
   process.exit(1)
 }
 
+// WHY: Validate FRONTEND_URL at startup in production — before cors() is called.
+// The IIFE inside cors() origin throws too late and gets swallowed silently.
+if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+  console.error('FATAL: FRONTEND_URL must be set in production. Set it in Vercel env vars.')
+  process.exit(1)
+}
+
 if (process.env.DEMO_MODE === 'true') {
   console.warn('[MedPharmChex] DEMO_MODE active — all API calls are mocked with pre-validated data')
 }
@@ -23,9 +30,8 @@ const PORT = process.env.PORT || 3001
 // WHY: CORS restricted to known frontend origin in production.
 // Allowing all origins (*) is a security risk — any website could call our API.
 // In development we allow localhost; in production we lock to the Vercel frontend URL.
-// WHY fallback: if FRONTEND_URL is missing in production, fail with clear message not silent block.
 const allowedOrigin = process.env.NODE_ENV === 'production'
-  ? (process.env.FRONTEND_URL || (() => { throw new Error('FRONTEND_URL must be set in production') })())
+  ? process.env.FRONTEND_URL
   : 'http://localhost:5173'
 
 app.use(cors({ origin: allowedOrigin }))
@@ -200,6 +206,9 @@ app.get('/api/drug/rxcui', async (req, res) => {
   if (!name || typeof name !== 'string' || name.trim().length < 2) {
     return res.status(400).json({ error: 'Drug name must be at least 2 characters.' })
   }
+  if (name.trim().length > 100) {
+    return res.status(400).json({ error: 'Drug name must be 100 characters or fewer.' })
+  }
 
   const cacheKey = `rxcui:${name.toLowerCase().trim()}`
   const cached = cache.get(cacheKey)
@@ -263,6 +272,9 @@ app.get('/api/faers', async (req, res) => {
 
   if (!drug || typeof drug !== 'string' || drug.trim().length < 2) {
     return res.status(400).json({ error: 'Drug name must be at least 2 characters.' })
+  }
+  if (drug.trim().length > 100) {
+    return res.status(400).json({ error: 'Drug name must be 100 characters or fewer.' })
   }
 
   const cacheKey = `faers:${drug.toLowerCase().trim()}`
@@ -379,15 +391,25 @@ Use plain language. No medical jargon. Be direct and caring. Respond in ${langua
 
     res.json({ explanation: message.content[0].text })
   } catch (err) {
+    if (err.status === 401) {
+      console.error('[MedPharmChex] Anthropic API key invalid or missing')
+    } else if (err.status === 429) {
+      console.error('[MedPharmChex] Anthropic rate limit hit')
+    } else {
+      console.error('[MedPharmChex] Anthropic API error:', err.message)
+    }
     res.status(500).json({ error: 'AI explanation unavailable. Please try again.' })
   }
 })
 
 // Global error handler — catches anything that escapes route try/catch blocks
 // Logs to console so Vercel function logs show the actual error
+// WHY: Never expose err.message or stack in production — it leaks internal details.
 app.use((err, req, res, _next) => {
   console.error('[MedPharmChex] Unhandled error:', err.message, err.stack)
-  res.status(500).json({ error: err.message || 'Internal server error' })
+  res.status(500).json({
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+  })
 })
 
 // Local dev: listen on PORT

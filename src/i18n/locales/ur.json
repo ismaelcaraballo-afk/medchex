@@ -10,7 +10,12 @@
     "placeholder_n": "دوا {{n}} (مثلاً Aspirin)",
     "add_drug": "+ دوا شامل کریں",
     "check_btn": "تعاملات جانچیں",
-    "checking": "جانچ جاری ہے..."
+    "checking": "جانچ جاری ہے...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "اس کا مطلب کیا ہے",

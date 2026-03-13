@@ -10,7 +10,12 @@
     "placeholder_n": "Médicament {{n}} (ex. Aspirine)",
     "add_drug": "+ Ajouter un médicament",
     "check_btn": "Vérifier les interactions",
-    "checking": "Vérification..."
+    "checking": "Vérification...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "Ce que cela signifie",

@@ -10,7 +10,12 @@
     "placeholder_n": "薬{{n}}（例：アスピリン）",
     "add_drug": "+ 薬を追加",
     "check_btn": "相互作用を確認",
-    "checking": "確認中..."
+    "checking": "確認中...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "これが意味すること",

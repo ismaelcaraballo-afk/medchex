@@ -32,6 +32,7 @@ export default function App() {
   const [result, setResult] = useState<CheckResult | null>(null)
 
   const handleCheck = async (drugs: string[]) => {
+    if (loading) return
     setLoading(true)
     setError(null)
     setResult(null)
@@ -54,7 +55,7 @@ export default function App() {
       const interactionData = await getInteractions(rxcuis)
       const pairs = interactionData.fullInteractionTypeGroup
         ?.flatMap((g: any) => g.fullInteractionType ?? [])
-        ?.flatMap((t: any) => t.interactionPair ?? []) ?? []
+        ?.flatMap((iType: any) => iType.interactionPair ?? []) ?? []
 
       // Step 3: Score severity
       setLoadingStep(3)
@@ -152,7 +153,7 @@ export default function App() {
       </footer>
 
       {/* Disclaimer ticker — fixed at bottom of every view */}
-      <div className="disclaimer-ticker" role="note" aria-label="Medical disclaimer">
+      <div className="disclaimer-ticker" role="note" aria-label="Medical disclaimer" aria-live="off">
         <div className="disclaimer-ticker-inner">
           <span className="disclaimer-ticker-text">{DISCLAIMER}</span>
           <span className="disclaimer-ticker-text" aria-hidden="true">{DISCLAIMER}</span>

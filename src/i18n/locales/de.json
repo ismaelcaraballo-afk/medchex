@@ -10,7 +10,12 @@
     "placeholder_n": "Medikament {{n}} (z.B. Aspirin)",
     "add_drug": "+ Medikament hinzufügen",
     "check_btn": "Wechselwirkungen prüfen",
-    "checking": "Prüfung läuft..."
+    "checking": "Prüfung läuft...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "Was das bedeutet",

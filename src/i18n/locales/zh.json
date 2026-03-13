@@ -10,7 +10,12 @@
     "placeholder_n": "药物{{n}}（例如：阿司匹林）",
     "add_drug": "+ 添加药物",
     "check_btn": "检查相互作用",
-    "checking": "检查中..."
+    "checking": "检查中...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "这意味着什么",

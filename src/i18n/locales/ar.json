@@ -10,7 +10,12 @@
     "placeholder_n": "الدواء {{n}} (مثل: Aspirin)",
     "add_drug": "+ إضافة دواء",
     "check_btn": "فحص التفاعلات",
-    "checking": "جارٍ الفحص..."
+    "checking": "جارٍ الفحص...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "ماذا يعني هذا",

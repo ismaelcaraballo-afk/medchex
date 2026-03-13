@@ -39,6 +39,7 @@ const PILLS: PillConfig[] = [
 
 export const FloatingElementsBackground = () => (
   <div
+    aria-hidden="true"
     style={{
       position: 'fixed',
       inset: 0,

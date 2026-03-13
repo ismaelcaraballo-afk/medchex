@@ -10,7 +10,12 @@
     "placeholder_n": "מעדיקאַמענט {{n}} (למשל Aspirin)",
     "add_drug": "+ צולייגן אַ מעדיקאַמענט",
     "check_btn": "בודקן די שייכות",
-    "checking": "בודקט זיך..."
+    "checking": "בודקט זיך...",
+    "step_lookup": "Looking up medications",
+    "step_interactions": "Finding interactions",
+    "step_scoring": "Scoring severity",
+    "step_explanation": "Generating explanation",
+    "step_adverse": "Checking adverse events"
   },
   "result": {
     "what_it_means": "וואָס דאָס מיינט",

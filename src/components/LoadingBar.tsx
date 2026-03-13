@@ -5,13 +5,15 @@
  * Step dots light up as each call completes. Current step animates.
  */
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
-const STEPS = [
-  { label: 'Looking up medications',   icon: '💊' },
-  { label: 'Finding interactions',     icon: '🔍' },
-  { label: 'Scoring severity',         icon: '⚖️' },
-  { label: 'Generating explanation',   icon: '🤖' },
-  { label: 'Checking adverse events',  icon: '📋' },
+const STEP_ICONS = ['💊', '🔍', '⚖️', '🤖', '📋']
+const STEP_KEYS = [
+  'search.step_lookup',
+  'search.step_interactions',
+  'search.step_scoring',
+  'search.step_explanation',
+  'search.step_adverse',
 ]
 
 interface LoadingBarProps {
@@ -19,23 +21,25 @@ interface LoadingBarProps {
 }
 
 export default function LoadingBar({ step }: LoadingBarProps) {
+  const { t } = useTranslation()
   // Bar fills 20% per step — reaches 100% when step 5 completes
-  const progress = (step / STEPS.length) * 100
-  const currentStep = step > 0 && step <= STEPS.length ? STEPS[step - 1] : null
+  const progress = (step / STEP_KEYS.length) * 100
+  const currentIcon  = step > 0 && step <= STEP_KEYS.length ? STEP_ICONS[step - 1] : null
+  const currentLabel = step > 0 && step <= STEP_KEYS.length ? t(STEP_KEYS[step - 1]) : null
 
   return (
     <div className="loading-bar-container">
 
       {/* Step dots */}
       <div className="lbd-dots">
-        {STEPS.map((s, i) => {
+        {STEP_KEYS.map((key, i) => {
           const isDone    = step > i + 1
           const isCurrent = step === i + 1
           return (
             <div
               key={i}
               className={`lbd-dot ${isDone ? 'lbd-done' : ''} ${isCurrent ? 'lbd-active' : ''}`}
-              title={s.label}
+              title={t(key)}
             >
               {isDone ? '✓' : i + 1}
             </div>
@@ -61,7 +65,7 @@ export default function LoadingBar({ step }: LoadingBarProps) {
       </div>
 
       {/* Current step label */}
-      {currentStep && (
+      {currentLabel && (
         <motion.div
           key={step}
           className="lbd-label"
@@ -69,8 +73,8 @@ export default function LoadingBar({ step }: LoadingBarProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <span>{currentStep.icon}</span>
-          <span>{currentStep.label}</span>
+          <span>{currentIcon}</span>
+          <span>{currentLabel}</span>
           <motion.span
             animate={{ opacity: [1, 0.2, 1] }}
             transition={{ duration: 0.9, repeat: Infinity }}
