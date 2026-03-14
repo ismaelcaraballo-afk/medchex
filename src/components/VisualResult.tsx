@@ -171,7 +171,7 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
       {/* Audio + pharmacist card controls */}
       <div className="visual-audio-controls">
         {!ttsAvailable && (
-          <span style={{ fontSize: '0.75rem', opacity: 0.6, alignSelf: 'center' }}>
+          <span style={{ fontSize: '0.95rem', opacity: 0.8, alignSelf: 'center' }}>
             🔇 Audio not available for this language
           </span>
         )}
