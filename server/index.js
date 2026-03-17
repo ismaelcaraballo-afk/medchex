@@ -53,7 +53,10 @@ app.use('/api/', limiter)
 // TTL = 1 hour — drug interaction data doesn't change minute-to-minute.
 const cache = new NodeCache({ stdTTL: 3600 })
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// Lazy-init: don't load the SDK (or require the key) when DEMO_MODE is active
+const anthropic = process.env.DEMO_MODE !== 'true'
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null
 
 // Maps RxCUI codes → drug names for DEMO_MODE interaction lookups
 const DEMO_RXCUI_MAP = {
@@ -292,7 +295,9 @@ app.get('/api/faers', async (req, res) => {
   }
 
   try {
-    const url = `https://api.fda.gov/drug/event.json?search=patient.drug.medicinalproduct:"${encodeURIComponent(drug.trim())}"&limit=5`
+    // Sanitize: only allow alphanumeric, spaces, and hyphens to prevent OpenFDA query injection
+    const safeDrug = drug.trim().replace(/[^a-zA-Z0-9\s-]/g, '')
+    const url = `https://api.fda.gov/drug/event.json?search=patient.drug.medicinalproduct:"${encodeURIComponent(safeDrug)}"&limit=5`
     const data = await fetch(url).then(r => r.json())
     cache.set(cacheKey, data)
     res.json(data)
@@ -356,6 +361,8 @@ const LANG_NAMES = {
   ja: 'Japanese', de: 'German'
 }
 
+const VALID_SEVERITIES = new Set(['SAFE', 'CAUTION', 'DANGEROUS'])
+
 app.post('/api/explain', async (req, res) => {
   const { interactions, drugs, severity, lang = 'en' } = req.body
 
@@ -365,6 +372,26 @@ app.post('/api/explain', async (req, res) => {
   if (drugs.length > 5 || !drugs.every(d => typeof d === 'string' && d.length <= 100)) {
     return res.status(400).json({ error: 'Invalid drugs array.' })
   }
+
+  // Whitelist severity — don't let the client fake a SAFE result for a DANGEROUS combo
+  if (!VALID_SEVERITIES.has(severity)) {
+    return res.status(400).json({ error: 'Invalid severity value.' })
+  }
+
+  // Validate interactions shape — only accept expected fields to prevent prompt injection
+  if (!Array.isArray(interactions)) {
+    return res.status(400).json({ error: 'interactions must be an array.' })
+  }
+  const safeInteractions = interactions.slice(0, 20).map(item => {
+    if (!item || typeof item !== 'object') return null
+    const { description, drug1, drug2 } = item
+    if (typeof description !== 'string') return null
+    return {
+      description: description.slice(0, 500),
+      drug1: typeof drug1 === 'string' ? drug1.slice(0, 100) : '',
+      drug2: typeof drug2 === 'string' ? drug2.slice(0, 100) : ''
+    }
+  }).filter(Boolean)
 
   const languageName = LANG_NAMES[lang] || 'English'
 
@@ -380,21 +407,22 @@ app.post('/api/explain', async (req, res) => {
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 512,
-      messages: [{
-        role: 'user',
-        content: `You are a pharmacist explaining drug interactions to a patient (not a doctor).
+      // WHY: System prompt vs user prompt — instructions in the system prompt take precedence
+      // over any injected text in user-supplied data. This prevents prompt injection attacks
+      // where a crafted drug name tries to hijack Claude's behavior.
+      system: `You are a pharmacist explaining drug interactions to a patient (not a doctor).
 Respond entirely in ${languageName}. Use plain language appropriate for that language's speakers.
-
-Medications entered: ${drugs.join(', ')}
-Severity level determined by FDA data: ${severity}
-Interactions found (from FDA/RxNorm data): ${JSON.stringify(interactions).slice(0, 4000)}
-
-In 2-3 short paragraphs:
+In 2-3 short paragraphs explain:
 1. What the interaction is and what body systems are affected
 2. How serious it is and what could happen
 3. What the patient should do (call pharmacist, avoid combination, monitor symptoms, etc.)
-
-Use plain language. No medical jargon. Be direct and caring. Respond in ${languageName}.`
+Use plain language. No medical jargon. Be direct and caring.
+IMPORTANT: Base your explanation only on the FDA/RxNorm data provided. Do not add information beyond what is given.`,
+      messages: [{
+        role: 'user',
+        content: `Medications: ${drugs.join(', ')}
+Severity (from FDA data): ${severity}
+Interactions (from FDA/RxNorm): ${JSON.stringify(safeInteractions).slice(0, 3000)}`
       }]
     })
 
