@@ -5,15 +5,15 @@
  * on the pill bottle. Zero literacy required.
  *
  * Strategy:
- *   1. Try native BarcodeDetector API (Chrome 83+, Android Chrome, Edge)
- *   2. If unavailable, show friendly message to use Chrome
- *   3. TODO: add @zxing/library fallback for Safari/iOS (post-Demo Day)
+ *   1. Try native BarcodeDetector API (Chrome 83+, Android Chrome, Edge) — fast
+ *   2. Fall back to @zxing/browser (Safari, iOS, Firefox, all other browsers)
  *
  * The NDC (National Drug Code) is a barcode format on US medication bottles.
  * We send the code to /api/drug/ndc which returns the drug name.
  */
 
 import { useRef, useState } from 'react'
+import { BrowserMultiFormatReader, BrowserCodeReader } from '@zxing/browser'
 import { getDrugByNDC } from '../services/drugApi'
 
 interface BarcodeScannerProps {
@@ -33,7 +33,7 @@ declare global {
   }
 }
 
-const isSupported = typeof window !== 'undefined' && 'BarcodeDetector' in window
+const hasNativeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window
 
 export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps) {
   const [scanning, setScanning] = useState(false)
@@ -41,59 +41,76 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const scanningRef = useRef(true)
+  const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null)
+
+  const handleNDC = async (ndc: string) => {
+    try {
+      const data = await getDrugByNDC(ndc)
+      if (data.name) {
+        onDrug(data.name)
+        stopScan()
+      }
+    } catch {
+      // NDC not found — keep scanning
+    }
+  }
+
+  const startScanNative = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }
+    })
+    streamRef.current = stream
+    if (videoRef.current) videoRef.current.srcObject = stream
+
+    const detector = new window.BarcodeDetector!({ formats: ['upc_a', 'upc_e', 'ean_13', 'ean_8', 'code_128'] })
+
+    let detecting = false
+    const scanLoop = async () => {
+      if (!scanningRef.current || !videoRef.current) return
+      if (detecting) { requestAnimationFrame(scanLoop); return }
+      detecting = true
+      try {
+        const barcodes = await detector.detect(videoRef.current)
+        if (barcodes.length > 0) {
+          await handleNDC(barcodes[0].rawValue)
+          return
+        }
+      } catch { /* continue */ }
+      detecting = false
+      if (scanningRef.current) requestAnimationFrame(scanLoop)
+    }
+    scanLoop()
+  }
+
+  const startScanZxing = async () => {
+    const reader = new BrowserMultiFormatReader()
+    zxingReaderRef.current = reader
+
+    // zxing manages the stream internally — pass the video element
+    await reader.decodeFromConstraints(
+      { video: { facingMode: 'environment' } },
+      videoRef.current!,
+      async (result, _err) => {
+        if (!scanningRef.current) return
+        if (result) {
+          await handleNDC(result.getText())
+        }
+        // _err here is normal "no barcode yet" — not a real error
+      }
+    )
+  }
 
   const startScan = async () => {
-    if (!isSupported) {
-      setError('Barcode scanning requires Chrome on Android. Type the drug name instead.')
-      return
-    }
-
     setError(null)
     setScanning(true)
     scanningRef.current = true
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }  // back camera
-      })
-      streamRef.current = stream
-      if (videoRef.current) videoRef.current.srcObject = stream
-
-      // Initialize barcode detector
-      const detector = new window.BarcodeDetector!({ formats: ['upc_a', 'upc_e', 'ean_13', 'ean_8', 'code_128'] })
-
-      // Decode loop on each animation frame
-      const scanLoop = async () => {
-        if (!scanningRef.current || !videoRef.current) return
-
-        try {
-          const barcodes = await detector.detect(videoRef.current)
-          
-          if (barcodes.length > 0) {
-            const ndc = barcodes[0].rawValue
-            
-            // Query backend via drugApi (uses correct base URL + error handling)
-            const data = await getDrugByNDC(ndc)
-            
-            if (data.name) {
-              // Drug found — call onDrug and stop scanning
-              onDrug(data.name)
-              stopScan()
-              return
-            }
-          }
-        } catch (err) {
-          // Silently continue scanning on detect error
-        }
-
-        // Continue scanning
-        if (scanningRef.current) {
-          requestAnimationFrame(scanLoop)
-        }
+      if (hasNativeDetector) {
+        await startScanNative()
+      } else {
+        await startScanZxing()
       }
-
-      scanLoop()
-
     } catch (err) {
       setError('Camera access denied. Please allow camera permission and try again.')
       setScanning(false)
@@ -103,8 +120,12 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
 
   const stopScan = () => {
     scanningRef.current = false
+    // Stop native stream tracks
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
+    // Stop zxing reader — releases all tracked streams
+    BrowserCodeReader.releaseAllStreams()
+    zxingReaderRef.current = null
     setScanning(false)
   }
 
