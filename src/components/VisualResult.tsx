@@ -79,14 +79,30 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
 
   // Check if the browser has any voice for the current language at runtime.
   // Some languages (e.g. Nahuatl) have no TTS voice in any OS — disable audio UI for those.
+  // Uses state + voiceschanged so it re-evaluates after the browser loads its voice list.
   const baseLang = i18n.language.split('-')[0]
   const ttsLang = VALID_SPEECH_LANGS.has(baseLang) ? i18n.language : 'en'
-  const ttsAvailable = (() => {
+
+  const checkVoiceAvailable = () => {
     if (!window.speechSynthesis) return false
-    if (baseLang === 'en') return true  // always available
+    if (baseLang === 'en') return true
     const voices = window.speechSynthesis.getVoices()
-    return voices.length === 0 || voices.some(v => v.lang.startsWith(baseLang))
-  })()
+    // If voices haven't loaded yet, assume unavailable for non-English to avoid false positives
+    if (voices.length === 0) return false
+    return voices.some(v => v.lang.startsWith(baseLang))
+  }
+
+  const [ttsAvailable, setTtsAvailable] = useState(checkVoiceAvailable)
+
+  useEffect(() => {
+    // Re-evaluate when language changes or when the browser finishes loading voices
+    setTtsAvailable(checkVoiceAvailable())
+    const synth = window.speechSynthesis
+    if (!synth) return
+    synth.onvoiceschanged = () => setTtsAvailable(checkVoiceAvailable())
+    return () => { synth.onvoiceschanged = null }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language])
 
   // Haptic feedback on result load — felt without reading or hearing
   useEffect(() => {
