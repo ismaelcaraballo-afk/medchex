@@ -395,12 +395,15 @@ app.post('/api/explain', async (req, res) => {
 
   const languageName = LANG_NAMES[lang] || 'English'
 
-  // DEMO_MODE: use pre-written English explanation only — for non-English, still call Claude
-  // so the explanation actually comes back in the selected language (not English read with a foreign accent)
-  if (process.env.DEMO_MODE === 'true' && (lang === 'en' || !lang)) {
+  // DEMO_MODE: return pre-written explanation for all languages — Claude isn't initialized
+  // in DEMO_MODE, so calling it would crash. The frontend re-fetches on language switch;
+  // if lang !== 'en' we return empty so the card hides the section and TTS uses i18n strings.
+  if (process.env.DEMO_MODE === 'true') {
     const demoKey = drugs.map(d => d.toLowerCase()).sort().join(',')
     const demoExplanation = DEMO_EXPLANATIONS[demoKey]
-    if (demoExplanation) return res.json({ explanation: demoExplanation })
+    if (demoExplanation && (lang === 'en' || !lang)) return res.json({ explanation: demoExplanation })
+    if (demoExplanation) return res.json({ explanation: '' }) // non-English: hide card, TTS handles it
+    return res.json({ explanation: '' })
   }
 
   try {

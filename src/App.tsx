@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import DrugSearch from './components/DrugSearch'
 import ResultCard from './components/ResultCard'
@@ -29,6 +29,16 @@ export default function App() {
   const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<CheckResult | null>(null)
+
+  // Re-fetch explanation in the new language when the user switches language mid-result.
+  // On failure (e.g. DEMO_MODE + non-English), clear explanation so the card hides it
+  // gracefully — TTS still works via the translated t('audio.*') strings.
+  useEffect(() => {
+    if (!result) return
+    explainInteractions(result.drugs, result.interactions, result.severity, i18n.language)
+      .then(data => setResult(prev => prev ? { ...prev, explanation: data.explanation ?? '' } : null))
+      .catch(() => setResult(prev => prev ? { ...prev, explanation: '' } : null))
+  }, [i18n.language]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCheck = async (drugs: string[]) => {
     if (loading) return
