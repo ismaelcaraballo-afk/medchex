@@ -36,5 +36,10 @@
     "api": "数据服务暂时不可用，请稍后再试。"
   },
   "footer": "数据来源：NIH RxNorm · FDA FAERS · Anthropic Claude",
-  "language_label": "语言"
+  "language_label": "语言",
+  "audio": {
+    "safe": "{{drugs}} 可以一起服用。这种组合是安全的。",
+    "caution": "警告。{{drugs}} 可能会相互作用。服用之前请咨询您的药剂师或医生。",
+    "dangerous": "停止。不要同时服用 {{drugs}}。这种组合很危险。现在就打电话给您的医生或药剂师。"
+  }
 }

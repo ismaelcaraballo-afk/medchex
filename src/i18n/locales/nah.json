@@ -36,5 +36,10 @@
     "api": "Amo cualli pahme tlamachiltia. Xicchihua oc cepa."
   },
   "footer": "Tlahtolli: NIH RxNorm · FDA FAERS · Anthropic Claude",
-  "language_label": "Tlahtol"
+  "language_label": "Tlahtol",
+  "audio": {
+    "safe": "{{drugs}} can be taken together. This combination is safe.",
+    "caution": "Warning. {{drugs}} may interact. Talk to your pharmacist or doctor before taking these together.",
+    "dangerous": "STOP. Do not take {{drugs}} together. This combination is dangerous. Call your doctor or pharmacist right now."
+  }
 }

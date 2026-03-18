@@ -33,5 +33,10 @@
     "generic": "Etwas ist schiefgelaufen. Stellen Sie sicher, dass der Backend-Server auf Port 3001 läuft."
   },
   "footer": "Datenquellen: NIH RxNorm · FDA FAERS · Anthropic Claude",
-  "language_label": "Sprache"
+  "language_label": "Sprache",
+  "audio": {
+    "safe": "{{drugs}} können zusammen eingenommen werden. Diese Kombination ist sicher.",
+    "caution": "Warnung. {{drugs}} können miteinander reagieren. Sprechen Sie mit Ihrem Apotheker oder Arzt, bevor Sie diese zusammen einnehmen.",
+    "dangerous": "STOP. Nehmen Sie {{drugs}} nicht zusammen ein. Diese Kombination ist gefährlich. Rufen Sie jetzt Ihren Arzt oder Apotheker an."
+  }
 }

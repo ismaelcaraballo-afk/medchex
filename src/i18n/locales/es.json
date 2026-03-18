@@ -36,5 +36,10 @@
     "api": "Servicio no disponible. Inténtalo en un momento."
   },
   "footer": "Fuentes de datos: NIH RxNorm · FDA FAERS · Anthropic Claude",
-  "language_label": "Idioma"
+  "language_label": "Idioma",
+  "audio": {
+    "safe": "{{drugs}} se pueden tomar juntos. Esta combinación es segura.",
+    "caution": "Advertencia. {{drugs}} pueden interactuar. Hable con su farmacéutico o médico antes de tomarlos juntos.",
+    "dangerous": "ALTO. No tome {{drugs}} juntos. Esta combinación es peligrosa. Llame a su médico o farmacéutico ahora mismo."
+  }
 }

@@ -70,7 +70,7 @@ const HAPTIC = {
 }
 
 export default function VisualResult({ severity, drugs, explanation }: VisualResultProps) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const config = VISUAL_CONFIG[severity as keyof typeof VISUAL_CONFIG] ?? VISUAL_CONFIG.CAUTION
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const [isSpeaking, setIsSpeaking] = useState(false)
@@ -140,7 +140,7 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
     if (!window.speechSynthesis || !ttsAvailable) return
     window.speechSynthesis.cancel()
 
-    const text = explanation || config.audioText(drugs)
+    const text = explanation || t(`audio.${severity.toLowerCase()}`, { drugs: drugs.join(', ') })
     const utterance = new SpeechSynthesisUtterance(text)
 
     utterance.lang = ttsLang
