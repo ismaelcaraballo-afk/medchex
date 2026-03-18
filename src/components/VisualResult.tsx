@@ -69,7 +69,7 @@ const HAPTIC = {
   DANGEROUS: [100, 80, 100, 80, 100],  // three rapid pulses
 }
 
-export default function VisualResult({ severity, drugs, explanation }: VisualResultProps) {
+export default function VisualResult({ severity, drugs, explanation: _explanation }: VisualResultProps) {
   const { t, i18n } = useTranslation()
   const config = VISUAL_CONFIG[severity as keyof typeof VISUAL_CONFIG] ?? VISUAL_CONFIG.CAUTION
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
@@ -140,7 +140,10 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
     if (!window.speechSynthesis || !ttsAvailable) return
     window.speechSynthesis.cancel()
 
-    const text = explanation || t(`audio.${severity.toLowerCase()}`, { drugs: drugs.join(', ') })
+    // Always use localized audio string — explanation may be in a different language
+    // if the user ran the check in English then switched to Spanish. The card shows
+    // the full explanation; audio always speaks the current UI language.
+    const text = t(`audio.${severity.toLowerCase()}`, { drugs: drugs.join(', ') })
     const utterance = new SpeechSynthesisUtterance(text)
 
     utterance.lang = ttsLang
