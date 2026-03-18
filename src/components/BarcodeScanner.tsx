@@ -8,6 +8,10 @@
  *   1. Try native BarcodeDetector API (Chrome 83+, Android Chrome, Edge) — fast
  *   2. Fall back to @zxing/browser (Safari, iOS, Firefox, all other browsers)
  *
+ * iOS Safari requires getUserMedia to be called directly from a tap event.
+ * So we acquire the stream in the click handler (gesture context), then
+ * attach it to the <video> element once React has rendered it (useEffect).
+ *
  * The NDC (National Drug Code) is a barcode format on US medication bottles.
  * We send the code to /api/drug/ndc which returns the drug name.
  */
@@ -56,10 +60,8 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
     }
   }
 
-  const startScanNative = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
-    })
+  // Called from useEffect after <video> is mounted. Stream already acquired.
+  const startScanNative = (stream: MediaStream) => {
     streamRef.current = stream
     if (videoRef.current) videoRef.current.srcObject = stream
 
@@ -68,7 +70,6 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
     let detecting = false
     const scanLoop = async () => {
       if (!scanningRef.current) return
-      // Video element may not be in DOM yet if React hasn't re-rendered — retry next frame
       if (!videoRef.current) { requestAnimationFrame(scanLoop); return }
       if (detecting) { requestAnimationFrame(scanLoop); return }
       detecting = true
@@ -85,13 +86,15 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
     scanLoop()
   }
 
-  const startScanZxing = async () => {
+  // Called from useEffect after <video> is mounted. Uses pre-acquired stream
+  // via decodeFromStream so getUserMedia is never called outside gesture context.
+  const startScanZxing = async (stream: MediaStream) => {
     const reader = new BrowserMultiFormatReader()
     zxingReaderRef.current = reader
+    streamRef.current = stream
 
-    // zxing manages the stream internally — pass the video element
-    await reader.decodeFromConstraints(
-      { video: { facingMode: 'environment' } },
+    await reader.decodeFromStream(
+      stream,
       videoRef.current!,
       async (result, _err) => {
         if (!scanningRef.current) return
@@ -103,29 +106,23 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
     )
   }
 
-  // Kick off camera after React has rendered <video> and videoRef.current is set.
-  // If startScan called the scan path directly, videoRef.current would be null
-  // because React hasn't re-rendered yet — this breaks iOS/Safari (zxing gets null).
+  // After React mounts <video>, attach the pre-acquired stream and start scanning.
+  // videoRef.current is guaranteed non-null here (useEffect runs post-commit).
   useEffect(() => {
-    if (!scanning) return
+    if (!scanning || !streamRef.current) return
+    const stream = streamRef.current
     let active = true
 
     const run = async () => {
       try {
         if (hasNativeDetector()) {
-          await startScanNative()
+          startScanNative(stream)
         } else {
-          await startScanZxing()
+          await startScanZxing(stream)
         }
       } catch (err) {
         if (!active) return
-        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
-          setError('Camera access denied. Please allow camera permission and try again.')
-        } else if (err instanceof DOMException && err.name === 'NotFoundError') {
-          setError('No camera found on this device.')
-        } else {
-          setError('Could not start camera. Please try again.')
-        }
+        setError('Could not start camera. Please try again.')
         setScanning(false)
         scanningRef.current = false
       }
@@ -135,10 +132,30 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
     return () => { active = false }
   }, [scanning]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const startScan = () => {
+  // Acquire camera stream NOW in user gesture context — iOS Safari requires
+  // getUserMedia to be called synchronously from a tap/click event.
+  const startScan = async () => {
     setError(null)
     scanningRef.current = true
-    setScanning(true) // triggers re-render → <video> mounts → useEffect starts camera
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      })
+      streamRef.current = stream
+    } catch (err) {
+      scanningRef.current = false
+      if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+        setError('Camera access denied. Please allow camera permission and try again.')
+      } else if (err instanceof DOMException && err.name === 'NotFoundError') {
+        setError('No camera found on this device.')
+      } else {
+        setError('Could not start camera. Please try again.')
+      }
+      return
+    }
+
+    setScanning(true) // triggers re-render → <video> mounts → useEffect attaches stream
   }
 
   const stopScan = () => {

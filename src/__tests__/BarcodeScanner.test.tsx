@@ -15,14 +15,14 @@ import BarcodeScanner from '../components/BarcodeScanner'
 
 // ─── Hoist mocks so they're available inside vi.mock factories ────────────────
 
-const { mockDecodeFromConstraints, mockReleaseAllStreams } = vi.hoisted(() => ({
-  mockDecodeFromConstraints: vi.fn(),
+const { mockDecodeFromStream, mockReleaseAllStreams } = vi.hoisted(() => ({
+  mockDecodeFromStream: vi.fn(),
   mockReleaseAllStreams: vi.fn(),
 }))
 
 vi.mock('@zxing/browser', () => ({
   BrowserMultiFormatReader: class {
-    decodeFromConstraints = mockDecodeFromConstraints
+    decodeFromStream = mockDecodeFromStream
   },
   BrowserCodeReader: class {
     static releaseAllStreams = mockReleaseAllStreams
@@ -65,7 +65,7 @@ beforeEach(() => {
   })
   mockGetDrugByNDC.mockResolvedValue({ name: 'Ibuprofen' })
   // Resolves immediately — scanning=true stays set, component renders stop button
-  mockDecodeFromConstraints.mockResolvedValue(undefined)
+  mockDecodeFromStream.mockResolvedValue(undefined)
 })
 
 afterEach(() => {
@@ -113,10 +113,6 @@ describe('BarcodeScanner — UI', () => {
 })
 
 // ─── Native BarcodeDetector path ─────────────────────────────────────────────
-// Note: the scan loop uses requestAnimationFrame + videoRef, which is tightly
-// coupled to React render timing in jsdom. We test the setup behavior (getUserMedia
-// called with correct constraints, stream cleanup) and leave decode loop coverage
-// to the zxing path tests which use a callback-based mock instead.
 
 describe('BarcodeScanner — native BarcodeDetector', () => {
   it('calls getUserMedia with back camera when BarcodeDetector is available', async () => {
@@ -144,9 +140,7 @@ describe('BarcodeScanner — native BarcodeDetector', () => {
     withNativeDetector()
     render(<BarcodeScanner onDrug={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
-    // Wait for scan to begin (getUserMedia called)
     await waitFor(() => expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalled())
-    // Stop button appears because scanning=true
     await waitFor(() => screen.getByRole('button', { name: /stop scanning/i }))
     fireEvent.click(screen.getByRole('button', { name: /stop scanning/i }))
     await waitFor(() => expect(mockStopTrack).toHaveBeenCalled())
@@ -158,25 +152,27 @@ describe('BarcodeScanner — native BarcodeDetector', () => {
 describe('BarcodeScanner — zxing fallback (iOS/Safari)', () => {
   beforeEach(() => withoutNativeDetector())
 
-  it('calls decodeFromConstraints when BarcodeDetector is unavailable', async () => {
+  it('calls getUserMedia in click handler (iOS gesture context requirement)', async () => {
     render(<BarcodeScanner onDrug={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
-    await waitFor(() => expect(mockDecodeFromConstraints).toHaveBeenCalled())
+    await waitFor(() => expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+      video: { facingMode: 'environment' },
+    }))
   })
 
-  it('requests back camera via environment facing mode', async () => {
+  it('calls decodeFromStream with the pre-acquired stream', async () => {
     render(<BarcodeScanner onDrug={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
-    await waitFor(() => expect(mockDecodeFromConstraints).toHaveBeenCalled())
-    expect(mockDecodeFromConstraints.mock.calls[0][0]).toEqual({ video: { facingMode: 'environment' } })
+    await waitFor(() => expect(mockDecodeFromStream).toHaveBeenCalled())
+    expect(mockDecodeFromStream.mock.calls[0][0]).toBe(mockStream)
   })
 
   it('calls onDrug when zxing fires a barcode result', async () => {
     const onDrug = vi.fn()
     let zxingCb!: (r: { getText(): string } | null, e: unknown) => void
 
-    mockDecodeFromConstraints.mockImplementation(
-      async (_c: unknown, _v: unknown, cb: typeof zxingCb) => {
+    mockDecodeFromStream.mockImplementation(
+      async (_s: unknown, _v: unknown, cb: typeof zxingCb) => {
         zxingCb = cb
       }
     )
@@ -185,7 +181,7 @@ describe('BarcodeScanner — zxing fallback (iOS/Safari)', () => {
     render(<BarcodeScanner onDrug={onDrug} />)
     fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
 
-    await waitFor(() => expect(mockDecodeFromConstraints).toHaveBeenCalled())
+    await waitFor(() => expect(mockDecodeFromStream).toHaveBeenCalled())
 
     // Simulate zxing finding a barcode
     await zxingCb({ getText: () => '00071015523' }, null)
@@ -198,15 +194,15 @@ describe('BarcodeScanner — zxing fallback (iOS/Safari)', () => {
     const onDrug = vi.fn()
     let zxingCb!: (r: null, e: Error) => void
 
-    mockDecodeFromConstraints.mockImplementation(
-      async (_c: unknown, _v: unknown, cb: typeof zxingCb) => {
+    mockDecodeFromStream.mockImplementation(
+      async (_s: unknown, _v: unknown, cb: typeof zxingCb) => {
         zxingCb = cb
       }
     )
 
     render(<BarcodeScanner onDrug={onDrug} />)
     fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
-    await waitFor(() => expect(mockDecodeFromConstraints).toHaveBeenCalled())
+    await waitFor(() => expect(mockDecodeFromStream).toHaveBeenCalled())
 
     zxingCb(null, new Error('No barcode'))
     await new Promise(r => setTimeout(r, 50))
@@ -227,7 +223,7 @@ describe('BarcodeScanner — zxing fallback (iOS/Safari)', () => {
 // ─── Camera permission denied ─────────────────────────────────────────────────
 
 describe('BarcodeScanner — camera denied', () => {
-  it('shows error when native path camera is denied', async () => {
+  it('shows error when camera is denied (native path)', async () => {
     withNativeDetector()
     ;(navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>)
       .mockRejectedValue(new DOMException('Permission denied', 'NotAllowedError'))
@@ -240,17 +236,29 @@ describe('BarcodeScanner — camera denied', () => {
     )
   })
 
-  it('shows error when zxing path camera is denied', async () => {
+  it('shows error when camera is denied (zxing path)', async () => {
     withoutNativeDetector()
-    mockDecodeFromConstraints.mockRejectedValue(
-      new DOMException('Permission denied', 'NotAllowedError')
-    )
+    ;(navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>)
+      .mockRejectedValue(new DOMException('Permission denied', 'NotAllowedError'))
 
     render(<BarcodeScanner onDrug={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
 
     await waitFor(() =>
       expect(screen.getByText(/camera access denied/i)).toBeInTheDocument()
+    )
+  })
+
+  it('shows no-camera error when device has no camera', async () => {
+    withoutNativeDetector()
+    ;(navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>)
+      .mockRejectedValue(new DOMException('Not found', 'NotFoundError'))
+
+    render(<BarcodeScanner onDrug={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /scan medication barcode/i }))
+
+    await waitFor(() =>
+      expect(screen.getByText(/no camera found/i)).toBeInTheDocument()
     )
   })
 })

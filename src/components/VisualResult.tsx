@@ -92,6 +92,18 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
     return voices.some(v => v.lang.startsWith(baseLang))
   }
 
+  // Pick the best available voice for a language — prefer native OS voices (localService)
+  // over remote/cloud voices. Without this, browsers may use the default English voice
+  // and just read the text "in a Spanish accent" instead of using an actual Spanish voice.
+  const pickVoice = (lang: string): SpeechSynthesisVoice | null => {
+    const voices = window.speechSynthesis?.getVoices() ?? []
+    const matches = voices.filter(v => v.lang.startsWith(lang))
+    if (matches.length === 0) return null
+    const local = matches.filter(v => v.localService)
+    const pool = local.length > 0 ? local : matches
+    return pool.find(v => v.default) ?? pool[0]
+  }
+
   const [ttsAvailable, setTtsAvailable] = useState(checkVoiceAvailable)
 
   useEffect(() => {
@@ -132,6 +144,8 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
     const utterance = new SpeechSynthesisUtterance(text)
 
     utterance.lang = ttsLang
+    const voice = pickVoice(baseLang)
+    if (voice) utterance.voice = voice
     utterance.rate = 0.85   // slightly slower — clearer for non-native speakers
     utterance.pitch = 1
 
@@ -172,6 +186,8 @@ export default function VisualResult({ severity, drugs, explanation }: VisualRes
               window.speechSynthesis.cancel()
               const u = new SpeechSynthesisUtterance(drug)
               u.lang = ttsLang
+              const v = pickVoice(baseLang)
+              if (v) u.voice = v
               u.rate = 0.85
               window.speechSynthesis.speak(u)
             }}
