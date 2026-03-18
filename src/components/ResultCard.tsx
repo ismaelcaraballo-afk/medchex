@@ -82,7 +82,7 @@ export default function ResultCard({ drugs, severity, explanation, interactions,
           <h3>{t('result.known_interactions', { count: interactions.length })}</h3>
           <ul>
             {interactions.map((interaction, i) => (
-              <li key={i} className="interaction-item">
+              <li key={`${interaction.description.slice(0, 40)}-${i}`} className="interaction-item">
                 {interaction.description}
               </li>
             ))}

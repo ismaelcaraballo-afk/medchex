@@ -12,7 +12,7 @@
  * We send the code to /api/drug/ndc which returns the drug name.
  */
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { BrowserMultiFormatReader, BrowserCodeReader } from '@zxing/browser'
 import { getDrugByNDC } from '../services/drugApi'
 
@@ -33,14 +33,15 @@ declare global {
   }
 }
 
-const hasNativeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window
+// Checked at call time (not module load time) so tests can set window.BarcodeDetector per-case
+const hasNativeDetector = () => typeof window !== 'undefined' && 'BarcodeDetector' in window
 
 export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps) {
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const scanningRef = useRef(true)
+  const scanningRef = useRef(false)
   const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null)
 
   const handleNDC = async (ndc: string) => {
@@ -66,7 +67,9 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
 
     let detecting = false
     const scanLoop = async () => {
-      if (!scanningRef.current || !videoRef.current) return
+      if (!scanningRef.current) return
+      // Video element may not be in DOM yet if React hasn't re-rendered — retry next frame
+      if (!videoRef.current) { requestAnimationFrame(scanLoop); return }
       if (detecting) { requestAnimationFrame(scanLoop); return }
       detecting = true
       try {
@@ -100,22 +103,42 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
     )
   }
 
-  const startScan = async () => {
-    setError(null)
-    setScanning(true)
-    scanningRef.current = true
+  // Kick off camera after React has rendered <video> and videoRef.current is set.
+  // If startScan called the scan path directly, videoRef.current would be null
+  // because React hasn't re-rendered yet — this breaks iOS/Safari (zxing gets null).
+  useEffect(() => {
+    if (!scanning) return
+    let active = true
 
-    try {
-      if (hasNativeDetector) {
-        await startScanNative()
-      } else {
-        await startScanZxing()
+    const run = async () => {
+      try {
+        if (hasNativeDetector()) {
+          await startScanNative()
+        } else {
+          await startScanZxing()
+        }
+      } catch (err) {
+        if (!active) return
+        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+          setError('Camera access denied. Please allow camera permission and try again.')
+        } else if (err instanceof DOMException && err.name === 'NotFoundError') {
+          setError('No camera found on this device.')
+        } else {
+          setError('Could not start camera. Please try again.')
+        }
+        setScanning(false)
+        scanningRef.current = false
       }
-    } catch (err) {
-      setError('Camera access denied. Please allow camera permission and try again.')
-      setScanning(false)
-      scanningRef.current = false
     }
+
+    run()
+    return () => { active = false }
+  }, [scanning]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const startScan = () => {
+    setError(null)
+    scanningRef.current = true
+    setScanning(true) // triggers re-render → <video> mounts → useEffect starts camera
   }
 
   const stopScan = () => {
