@@ -43,21 +43,50 @@ const hasNativeDetector = () => typeof window !== 'undefined' && 'BarcodeDetecto
 export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps) {
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [scanStatus, setScanStatus] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const scanningRef = useRef(false)
   const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null)
+  const lastTriedRef = useRef<string | null>(null)
 
-  const handleNDC = async (ndc: string) => {
-    try {
-      const data = await getDrugByNDC(ndc)
-      if (data.name) {
-        onDrug(data.name)
-        stopScan()
+  // Normalize NDC barcode to formats RxNorm accepts.
+  // Pill bottles use EAN-13/UPC which may encode NDC with a leading zero or
+  // country prefix. We strip to digits and try the 11-digit and 10-digit forms.
+  const normalizeNDC = (raw: string): string[] => {
+    const digits = raw.replace(/\D/g, '')
+    const candidates: string[] = [digits]
+    // EAN-13 often has a leading '0' before the 10-digit NDC
+    if (digits.length === 12) candidates.push(digits.slice(1))   // 12 → 11
+    if (digits.length === 13) candidates.push(digits.slice(1), digits.slice(2)) // 13 → 12 → 11
+    if (digits.length === 11) candidates.push(digits.slice(1))   // 11 → 10
+    return [...new Set(candidates)]
+  }
+
+  const handleNDC = async (raw: string) => {
+    // Deduplicate — zxing fires the callback on every frame
+    if (lastTriedRef.current === raw) return
+    lastTriedRef.current = raw
+
+    setScanStatus(`Found barcode — looking up drug…`)
+
+    const candidates = normalizeNDC(raw)
+    for (const code of candidates) {
+      try {
+        const data = await getDrugByNDC(code)
+        if (data.name) {
+          onDrug(data.name)
+          stopScan()
+          return
+        }
+      } catch {
+        // try next candidate
       }
-    } catch {
-      // NDC not found — keep scanning
     }
+
+    // No candidate matched — show what was scanned so user can type it manually
+    setScanStatus(`Barcode "${raw}" not found in drug database. Try typing the drug name.`)
+    lastTriedRef.current = null  // allow retry if they point at same barcode again
   }
 
   // Called from useEffect after <video> is mounted. Stream already acquired.
@@ -160,12 +189,12 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
 
   const stopScan = () => {
     scanningRef.current = false
-    // Stop native stream tracks
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
-    // Stop zxing reader — releases all tracked streams
     BrowserCodeReader.releaseAllStreams()
     zxingReaderRef.current = null
+    lastTriedRef.current = null
+    setScanStatus(null)
     setScanning(false)
   }
 
@@ -200,7 +229,9 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
           >
             ✕ Stop
           </button>
-          <p className="scan-hint">Point camera at pill bottle barcode</p>
+          <p className="scan-hint">
+            {scanStatus ?? 'Point camera at pill bottle barcode'}
+          </p>
         </div>
       )}
       {error && <p className="scan-error">{error}</p>}
