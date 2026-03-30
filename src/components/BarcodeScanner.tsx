@@ -16,8 +16,8 @@
  * We send the code to /api/drug/ndc which returns the drug name.
  */
 
-import { useRef, useState, useEffect } from 'react'
-import { BrowserMultiFormatReader, BrowserCodeReader } from '@zxing/browser'
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser'
 import { getDrugByNDC } from '../services/drugApi'
 
 interface BarcodeScannerProps {
@@ -47,35 +47,47 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const scanningRef = useRef(false)
-  const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null)
+  const zxingControlsRef = useRef<IScannerControls | null>(null)
+  const animFrameRef = useRef<number | null>(null)
   const lastTriedRef = useRef<string | null>(null)
 
   // Normalize NDC barcode to formats RxNorm accepts.
   // Pill bottles use EAN-13/UPC which may encode NDC with a leading zero or
-  // country prefix. We strip to digits and try the 11-digit and 10-digit forms.
+  // country prefix. We strip to digits and try multiple candidate forms.
   const normalizeNDC = (raw: string): string[] => {
     const digits = raw.replace(/\D/g, '')
     const candidates: string[] = [digits]
-    // EAN-13 often has a leading '0' before the 10-digit NDC
-    if (digits.length === 12) candidates.push(digits.slice(1))   // 12 → 11
-    if (digits.length === 13) candidates.push(digits.slice(1), digits.slice(2)) // 13 → 12 → 11
-    if (digits.length === 11) candidates.push(digits.slice(1))   // 11 → 10
+    // 10-digit NDC: pad to 11 digits with leading zero (RxNorm prefers 11)
+    if (digits.length === 10) candidates.push('0' + digits)
+    // 12-digit UPC-A: strip leading zero → 11-digit NDC
+    if (digits.length === 12) candidates.push(digits.slice(1))
+    // EAN-13: leading country digit + 10-digit NDC + check digit
+    // Extract the 11-digit and 10-digit NDC from the middle
+    if (digits.length === 13) {
+      candidates.push(digits.slice(1, 12))  // 11 digits (country stripped)
+      candidates.push(digits.slice(2, 12))  // 10 digits (NDC proper)
+    }
     return [...new Set(candidates)]
   }
 
-  const handleNDC = async (raw: string) => {
+  const handleNDC = useCallback(async (raw: string) => {
+    // Validate — NDC barcodes are digits only, max 13 chars (EAN-13)
+    if (!raw || raw.length > 20 || !/^[\d\-\s]+$/.test(raw)) return
+
     // Deduplicate — zxing fires the callback on every frame
     if (lastTriedRef.current === raw) return
     lastTriedRef.current = raw
 
-    setScanStatus(`Found barcode — looking up drug…`)
+    setScanStatus('Found barcode — looking up drug…')
 
     const candidates = normalizeNDC(raw)
     for (const code of candidates) {
+      // Bail if scanning was stopped while API call was in flight
+      if (!scanningRef.current) return
       try {
         const data = await getDrugByNDC(code)
         if (data.name) {
-          onDrug(data.name)
+          if (scanningRef.current) onDrug(data.name)  // guard before firing callback
           stopScan()
           return
         }
@@ -84,86 +96,109 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
       }
     }
 
-    // No candidate matched — show what was scanned so user can type it manually
-    setScanStatus(`Barcode "${raw}" not found in drug database. Try typing the drug name.`)
-    lastTriedRef.current = null  // allow retry if they point at same barcode again
-  }
+    // No candidate matched — show truncated sanitized barcode so user can type manually
+    const display = raw.replace(/[<>&"']/g, '').slice(0, 20)
+    setScanStatus(`Barcode "${display}" not found in drug database. Try typing the drug name.`)
+    lastTriedRef.current = null  // reset so user can retry the same barcode
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onDrug])
 
   // Called from useEffect after <video> is mounted. Stream already acquired.
-  const startScanNative = (stream: MediaStream) => {
+  const startScanNative = useCallback((stream: MediaStream) => {
+    if (!scanningRef.current) return
+    if (!videoRef.current) {
+      setError('Could not start camera. Please try again.')
+      setScanning(false)
+      scanningRef.current = false
+      return
+    }
+
     streamRef.current = stream
-    if (videoRef.current) videoRef.current.srcObject = stream
+    videoRef.current.srcObject = stream
+    videoRef.current.play().catch(() => {})
 
     const detector = new window.BarcodeDetector!({ formats: ['upc_a', 'upc_e', 'ean_13', 'ean_8', 'code_128'] })
 
     let detecting = false
     const scanLoop = async () => {
       if (!scanningRef.current) return
-      if (!videoRef.current) { requestAnimationFrame(scanLoop); return }
-      if (detecting) { requestAnimationFrame(scanLoop); return }
+      if (!videoRef.current) return
+      if (detecting) { animFrameRef.current = requestAnimationFrame(scanLoop); return }
       detecting = true
       try {
         const barcodes = await detector.detect(videoRef.current)
-        if (barcodes.length > 0) {
+        if (barcodes.length > 0 && scanningRef.current) {
           await handleNDC(barcodes[0].rawValue)
           return
         }
       } catch { /* continue */ }
       detecting = false
-      if (scanningRef.current) requestAnimationFrame(scanLoop)
+      if (scanningRef.current) animFrameRef.current = requestAnimationFrame(scanLoop)
     }
-    scanLoop()
-  }
+    animFrameRef.current = requestAnimationFrame(scanLoop)
+  }, [handleNDC])
 
   // Called from useEffect after <video> is mounted. Uses pre-acquired stream
   // via decodeFromStream so getUserMedia is never called outside gesture context.
-  const startScanZxing = async (stream: MediaStream) => {
+  const startScanZxing = useCallback(async (stream: MediaStream) => {
+    if (!scanningRef.current) return
+    if (!videoRef.current) {
+      setError('Could not start camera. Please try again.')
+      setScanning(false)
+      scanningRef.current = false
+      return
+    }
+
     const reader = new BrowserMultiFormatReader()
-    zxingReaderRef.current = reader
     streamRef.current = stream
 
-    await reader.decodeFromStream(
-      stream,
-      videoRef.current!,
-      async (result, _err) => {
-        if (!scanningRef.current) return
-        if (result) {
-          await handleNDC(result.getText())
+    try {
+      // decodeFromStream returns controls — must call controls.stop() to kill the decode loop.
+      const controls = await reader.decodeFromStream(
+        stream,
+        videoRef.current,
+        async (result, _err) => {
+          if (!scanningRef.current) return
+          if (result) {
+            await handleNDC(result.getText())
+          }
+          // _err here is normal "no barcode yet" — not a real error
         }
-        // _err here is normal "no barcode yet" — not a real error
+      )
+      zxingControlsRef.current = controls
+    } catch {
+      if (scanningRef.current) {
+        setError('Could not start camera. Please try again.')
+        setScanning(false)
+        scanningRef.current = false
       }
-    )
-  }
+    }
+  }, [handleNDC])
 
   // After React mounts <video>, attach the pre-acquired stream and start scanning.
   // videoRef.current is guaranteed non-null here (useEffect runs post-commit).
   useEffect(() => {
     if (!scanning || !streamRef.current) return
     const stream = streamRef.current
-    let active = true
 
-    const run = async () => {
-      try {
-        if (hasNativeDetector()) {
-          startScanNative(stream)
-        } else {
-          await startScanZxing(stream)
-        }
-      } catch (err) {
-        if (!active) return
-        setError('Could not start camera. Please try again.')
-        setScanning(false)
-        scanningRef.current = false
-      }
+    if (hasNativeDetector()) {
+      startScanNative(stream)
+    } else {
+      startScanZxing(stream)
     }
 
-    run()
-    return () => { active = false }
-  }, [scanning]) // eslint-disable-line react-hooks/exhaustive-deps
+    // Cleanup: stop everything if component unmounts or scanning state changes
+    return () => {
+      stopScan()
+    }
+  }, [scanning, startScanNative, startScanZxing])
 
   // Acquire camera stream NOW in user gesture context — iOS Safari requires
   // getUserMedia to be called synchronously from a tap/click event.
   const startScan = async () => {
+    // Guard against double-tap starting two streams
+    if (scanningRef.current || streamRef.current) return
+
     setError(null)
     scanningRef.current = true
 
@@ -189,10 +224,19 @@ export default function BarcodeScanner({ onDrug, disabled }: BarcodeScannerProps
 
   const stopScan = () => {
     scanningRef.current = false
-    streamRef.current?.getTracks().forEach(t => t.stop())
+    // Cancel native scan loop first
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current)
+      animFrameRef.current = null
+    }
+    // Stop zxing decode loop before releasing the stream
+    zxingControlsRef.current?.stop()
+    zxingControlsRef.current = null
+    // Then release the camera stream
+    streamRef.current?.getTracks().forEach(t => {
+      if (t.readyState === 'live') t.stop()
+    })
     streamRef.current = null
-    BrowserCodeReader.releaseAllStreams()
-    zxingReaderRef.current = null
     lastTriedRef.current = null
     setScanStatus(null)
     setScanning(false)
