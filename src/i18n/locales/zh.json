@@ -1,7 +1,7 @@
 {
   "header": {
-    "title": "MedPharmChex",
-    "subtitle": "基于FDA数据的药物相互作用检查工具"
+    "title": "MedRxChex",
+    "subtitle": "由FDA数据支持的药物相互作用检查器"
   },
   "search": {
     "hint": "输入2至5种药物以检查相互作用",

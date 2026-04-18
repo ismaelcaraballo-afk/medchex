@@ -108,8 +108,11 @@ export default function ResultCard({ drugs, severity, explanation, interactions,
         <button className="print-btn" onClick={() => setShowPharmacist(true)}>
           💊 Show Pharmacist
         </button>
+        <button className="print-btn" onClick={handlePrint}>
+          🖨 Print Results
+        </button>
         <button className="print-btn" onClick={handleSave}>
-          {canShare ? '📱 Save / Share' : '🖨 Print / Save PDF'}
+          {canShare ? '📱 Save / Share' : '💾 Save'}
         </button>
       </div>
 

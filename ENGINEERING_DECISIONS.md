@@ -1,4 +1,4 @@
-# MedPharmChex — Engineering Decisions Log
+# MedRxChex — Engineering Decisions Log
 
 This document explains *why* each technical decision was made.
 Written for the team (Ismael + Paula) and for Demo Day Q&A.

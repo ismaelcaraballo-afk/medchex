@@ -67,7 +67,7 @@ export default function PharmacistCard({ drugs, severity, onClose }: PharmacistC
         </div>
 
         <p className="pharmacist-source">
-          Source: FDA FAERS + NIH RxNorm · MedPharmChex
+          Source: FDA FAERS + NIH RxNorm · MedRxChex
         </p>
 
         <button

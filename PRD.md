@@ -1,9 +1,9 @@
-# MedPharmChex — Product Requirements Document
+# MedRxChex — Product Requirements Document
 
 **Team:** Ismael Caraballo · Paula Maiguru
 **Program:** Pursuit L2 Capstone
 **Demo Day:** March 18, 2026
-**Repo:** https://github.com/ismaelcaraballo-afk/medpharmchex
+**Repo:** https://github.com/ismaelcaraballo-afk/medrxchex
 
 ---
 

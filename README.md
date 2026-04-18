@@ -1,6 +1,6 @@
-# MedPharmChex — Medication Interaction Checker
+# MedRxChex — Medication Interaction Checker
 
-**Does it mix?** MedPharmChex checks drug combinations for dangerous interactions, scores severity using real FDA adverse event data, and explains the risks in plain English using AI.
+**Does it mix?** MedRxChex checks drug combinations for dangerous interactions, scores severity using real FDA adverse event data, and explains the risks in plain English using AI.
 
 Built as a Pursuit L2 capstone project by Ismael Caraballo and Paula Maiguru.
 

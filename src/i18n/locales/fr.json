@@ -1,7 +1,7 @@
 {
   "header": {
-    "title": "MedPharmChex",
-    "subtitle": "Vérificateur d'interactions médicamenteuses basé sur les données FDA"
+    "title": "MedRxChex",
+    "subtitle": "Vérificateur d'interactions médicamenteuses soutenu par les données de la FDA"
   },
   "search": {
     "hint": "Entrez 2 à 5 médicaments pour vérifier les interactions",
